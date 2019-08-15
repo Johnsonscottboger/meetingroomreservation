@@ -5,12 +5,25 @@ var app = new Vue({
         return {
             isHidden: true,
             collapse: false,
-            showDialog:false,
-            reservationRecord :{
-                meetingroom:'',
-                start:'',
-                end:'',
-                comments:''
+            showDialog: false,
+            reservationRecord: {
+                meetingroom: null,
+                start: null,
+                end: null,
+                comments: null
+            },
+            rules: {
+                meetingroom: [
+                    {required: true, message: '请选择会议室', trigger: 'blur'}
+                ],
+                start: [
+                    {required: true, message: '请选择开始时间', trigger: 'blur'},
+                    {min: new Date(), message: '请选择现在之后的时间', trigger: 'change'}
+                ],
+                end: [
+                    {required: true, message: '请选择结束时间', trigger: 'blur'},
+                    {min: new Date(), message: '请选择开始之后的时间', trigger: 'change'}
+                ]
             }
         }
     },
@@ -24,6 +37,21 @@ var app = new Vue({
         },
         handleReserve: function () {
             app.showDialog = true
+        },
+        handleSubmit: function (formName) {
+            this.$refs[formName].validate(function (valid) {
+                if (valid) {
+                    alert('submit!');
+                    app.showDialog = false;
+                } else {
+                    console.log('valid error');
+                    return false;
+                }
+            });
+        },
+        handleCancel: function (formName) {
+            this.$refs[formName].resetFields();
+            app.showDialog = false;
         }
     }
 });

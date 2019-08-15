@@ -29,10 +29,10 @@
                     <el-menu-item index="/reserve-index">
                         <i class="el-icon-message"></i><span slot="title">预约</span>
                     </el-menu-item>
-                    <el-menu-item index="/user-index">
+                    <el-menu-item index="/meetingroom-index">
                         <i class="el-icon-menu"></i><span slot="title">会议室</span>
                     </el-menu-item>
-                    <el-menu-item index="/meetingroom-index">
+                    <el-menu-item index="/user-index">
                         <i class="el-icon-setting"></i><span slot="title">用户</span>
                     </el-menu-item>
                 </el-menu>
@@ -42,33 +42,37 @@
             </el-main>
 
             <el-dialog title="预定会议室" :visible.sync="showDialog">
-                <el-form :model="reservationRecord" label-width="80px">
-                    <el-form-item label="会议室">
+                <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="80px">
+                    <el-form-item label="会议室" prop="meetingroom">
                         <el-input v-model="reservationRecord.meetingroom"></el-input>
                     </el-form-item>
-                    <el-form-item label="开始时间">
+                    <el-form-item label="起止时间" required>
                         <el-row>
                             <el-col :span="11">
-                                <el-date-picker v-model="reservationRecord.start" type="datetime"
-                                                style="width: 100%"
-                                                placeholder="选择时间"></el-date-picker>
+                                <el-form-item prop="start">
+                                    <el-date-picker v-model="reservationRecord.start" type="datetime"
+                                                    style="width: 100%"
+                                                    placeholder="选择开始时间"></el-date-picker>
+                                </el-form-item>
                             </el-col>
                             <el-col class="line" :span="2" style="text-align: center">-</el-col>
                             <el-col :span="11">
-                                <el-date-picker v-model="reservationRecord.end" type="datetime"
-                                                style="width: 100%"
-                                                placeholder="选择时间"></el-date-picker>
+                                <el-form-item prop="end">
+                                    <el-date-picker v-model="reservationRecord.end" type="datetime"
+                                                    style="width: 100%"
+                                                    placeholder="选择结束时间"></el-date-picker>
+                                </el-form-item>
                             </el-col>
                         </el-row>
                     </el-form-item>
-                    <el-form-item label="开始时间">
+                    <el-form-item label="会议内容">
                         <el-input type="textarea" v-model="reservationRecord.comments" :row="2"
                                   placeholder="请输入会议内容"></el-input>
                     </el-form-item>
                 </el-form>
                 <div slot="footer" class="dialog-footer">
-                    <el-button @click="dialogFormVisible = false">取 消</el-button>
-                    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+                    <el-button type="primary" @click="handleSubmit('reservationRecord')">确 定</el-button>
+                    <el-button @click="handleCancel('reservationRecord')">取 消</el-button>
                 </div>
             </el-dialog>
 
@@ -77,7 +81,7 @@
 </div>
 <base th:href="@{/}"/>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/vue-router/dist/vue-router.js "></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="/js/util.js"></script>

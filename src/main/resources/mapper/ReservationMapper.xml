@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.aning.meetingroomreservation.dao.IMeetingRoomDao">
-    <resultMap id="map" type="com.aning.meetingroomreservation.entity.MeetingRoom">
+<mapper namespace="com.aning.meetingroomreservation.dao.IReservationDao">
+    <resultMap id="map" type="com.aning.meetingroomreservation.entity.ReservationRecord">
         <id column="id" property="id" jdbcType="CHAR"/>
         <result column="ip" property="ip" jdbcType="CHAR"/>
         <result column="userId" property="userId" jdbcType="CHAR"/>
         <result column="meetingRoomId" property="meetingRoomId" jdbcType="CHAR"/>
-        <result column="startTime" property="startTime" javaType="DATETIME"/>
-        <result column="endTime" property="endTime" javaType="DATETIME"/>
-        <result column="status" property="status" jdbcType="INT"/>
-        <result column="reserveTime" property="reserveTime" jdbcType="DATETIME"/>
+        <result column="startTime" property="startTime" javaType="DATE"/>
+        <result column="endTime" property="endTime" javaType="DATE"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="reserveTime" property="reserveTime" jdbcType="DATE"/>
     </resultMap>
 
     <insert id="add" keyProperty="id" keyColumn="id">
