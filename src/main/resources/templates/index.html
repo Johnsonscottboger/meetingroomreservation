@@ -29,10 +29,10 @@
                     <el-menu-item index="/reserve-index">
                         <i class="el-icon-message"></i><span slot="title">预约</span>
                     </el-menu-item>
-                    <el-menu-item index="/user-index">
+                    <el-menu-item index="/meetingroom-index">
                         <i class="el-icon-menu"></i><span slot="title">会议室</span>
                     </el-menu-item>
-                    <el-menu-item index="/meetingroom-index">
+                    <el-menu-item index="/user-index">
                         <i class="el-icon-setting"></i><span slot="title">用户</span>
                     </el-menu-item>
                 </el-menu>
@@ -77,11 +77,12 @@
 </div>
 <base th:href="@{/}"/>
 <script src="https://unpkg.com/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/vue-router/dist/vue-router.js "></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="/js/util.js"></script>
 <script src="/js/routes.js"></script>
 <script src="/js/main.js"></script>
+<script src="/api/meetingroom.js"></script>
 </body>
 </html>

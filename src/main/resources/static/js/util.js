@@ -58,6 +58,10 @@ var util = {
                     var options = target.parseComponent(response.data, options);
                     resolve(options);
                 });
+            // $.get(url, function (response) {
+            //     var options = target.parseComponent(response, options);
+            //     resolve(options);
+            // })
         }
     }
 };
