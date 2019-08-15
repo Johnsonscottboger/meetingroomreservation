@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.aning.meetingroomreservation.dao.IMeetingRoomDao">
+    <resultMap id="map" type="com.aning.meetingroomreservation.entity.MeetingRoom">
+        <id column="id" property="id" jdbcType="CHAR"/>
+        <result column="ip" property="ip" jdbcType="CHAR"/>
+        <result column="userId" property="userId" jdbcType="CHAR"/>
+        <result column="meetingRoomId" property="meetingRoomId" jdbcType="CHAR"/>
+        <result column="startTime" property="startTime" javaType="DATETIME"/>
+        <result column="endTime" property="endTime" javaType="DATETIME"/>
+        <result column="status" property="status" jdbcType="INT"/>
+        <result column="reserveTime" property="reserveTime" jdbcType="DATETIME"/>
+    </resultMap>
+
+    <insert id="add" keyProperty="id" keyColumn="id">
+        insert into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, status, reserveTime)
+        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{status}, #{reserveTime})
+    </insert>
+
+    <delete id="delete">
+        delete from ReservationRecord
+        where id = #{id}
+    </delete>
+
+    <update id="update">
+        update ReservationRecord
+        set ip = #{ip},
+            userId = #{userId},
+            meetingRoomId = #{meetingRoomId},
+            startTime = #{startTime},
+            endTime = #{endTime},
+            status = #{status},
+            reserveTime = #{reserveTime}
+        where id = #{id}
+    </update>
+
+    <insert id="addOrUpdate">
+        replace into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, status, reserveTime)
+        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{status}, #{reserveTime})
+    </insert>
+
+    <update id="updateList">
+        update ReservationRecord set
+        ip =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{ip}
+        </foreach>
+        , userId =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{userId}
+        </foreach>
+        , meetingRoomId =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{meetingRoomId}
+        </foreach>
+        , startTime =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{startTime}
+        </foreach>
+        , endTime =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{endTime}
+        </foreach>
+        , status =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{status}
+        </foreach>
+        , reserveTime =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{id} then #{reserveTime}
+        </foreach>
+        where id in
+        <foreach collection="list" item="ReservationRecord" index="index" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getAll" resultMap="map">
+        select * from ReservationRecord
+    </select>
+
+    <select id="getById" resultMap="map">
+        select * from ReservationRecord
+        where id = #{id}
+    </select>
+
+    <select id="getByUserId" resultMap="map">
+        select * from ReservationRecord
+        where userId = #{userId}
+    </select>
+
+    <select id="getByStatus" resultMap="map">
+        select * from ReservationRecord
+        where status = #{status}
+    </select>
+
+    <select id="getByStatusList" resultMap="map">
+        select * from ReservationRecord
+        where status in
+        <foreach collection="list" item="status" index="index" open="(" close=")" separator=",">
+            #{status}
+        </foreach>
+    </select>
+
+    <select id="getByMeetingRoomId" resultMap="map">
+        select * from ReservationRecord
+        where meetingRoomId = #{meetingRoomId}
+    </select>
+
+    <select id="getByDateTime" resultMap="map">
+        select * from ReservationRecord
+        where #{start} &lt;= startTime and entTime &gt;= #{end}
+    </select>
+
+    <select id="getByMeetingRoomIdDateTime" resultMap="map">
+        select * from ReservationRecord
+        where meetingRoomId = #{meetingRoomId} and #{start} &lt;= startTime and entTime &gt;= #{end}
+    </select>
+</mapper>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.aning.meetingroomreservation.dao.IUserDao">
+    <resultMap id="userMap" type="com.aning.meetingroomreservation.entity.User">
+        <id column="id" property="id" jdbcType="CHAR"/>
+        <result column="ip" property="ip" jdbcType="CHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="department" property="department" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="add" keyProperty="id" keyColumn="id">
+        insert into User (id, ip, name, department)
+        values (#{id}, #{ip}, #{name}, #{department})
+    </insert>
+
+    <delete id="delete">
+        delete from User
+        where id = #{id}
+    </delete>
+
+    <update id="update">
+        update User
+        set ip = #{ip},
+            name = #{name},
+            department = #{department}
+        where id = #{id}
+    </update>
+
+    <insert id="addOrUpdate">
+        replace into User (id, ip, name, department)
+        values (#{id}, #{ip}, #{name}, #{department})
+    </insert>
+
+    <select id="getAll" resultMap="userMap">
+        select * from User
+    </select>
+
+    <select id="getById" resultMap="userMap">
+        select * from User
+        where id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http:www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <title>会议室预约</title>
+    <style rel="stylesheet">
+        .hidden {
+            display: none;
+        }
+
+        .el-link {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header style="height: 30px; text-align: right; font-size: 24px; margin-top: 10px">
+            <el-link icon="el-icon-date" :underline="false" @click="handleReserve">预约</el-link>
+            <el-link icon="el-icon-setting" :underline="false" @click="handleSetting">管理</el-link>
+        </el-header>
+        <el-container style="solid:#eee">
+            <el-aside class="nav-menu" :class="{hidden:isHidden}" style="width: 150px">
+                <el-menu :default-openeds="['/reserve-index']" :default-active="$route.path" :collapse="collapse"
+                         @select="handleSelect">
+                    <el-menu-item index="/reserve-index">
+                        <i class="el-icon-message"></i><span slot="title">预约</span>
+                    </el-menu-item>
+                    <el-menu-item index="/user-index">
+                        <i class="el-icon-menu"></i><span slot="title">会议室</span>
+                    </el-menu-item>
+                    <el-menu-item index="/meetingroom-index">
+                        <i class="el-icon-setting"></i><span slot="title">用户</span>
+                    </el-menu-item>
+                </el-menu>
+            </el-aside>
+            <el-main>
+                <router-view></router-view>
+            </el-main>
+
+            <el-dialog title="预定会议室" :visible.sync="showDialog">
+                <el-form :model="reservationRecord" label-width="80px">
+                    <el-form-item label="会议室">
+                        <el-input v-model="reservationRecord.meetingroom"></el-input>
+                    </el-form-item>
+                    <el-form-item label="开始时间">
+                        <el-row>
+                            <el-col :span="11">
+                                <el-date-picker v-model="reservationRecord.start" type="datetime"
+                                                style="width: 100%"
+                                                placeholder="选择时间"></el-date-picker>
+                            </el-col>
+                            <el-col class="line" :span="2" style="text-align: center">-</el-col>
+                            <el-col :span="11">
+                                <el-date-picker v-model="reservationRecord.end" type="datetime"
+                                                style="width: 100%"
+                                                placeholder="选择时间"></el-date-picker>
+                            </el-col>
+                        </el-row>
+                    </el-form-item>
+                    <el-form-item label="开始时间">
+                        <el-input type="textarea" v-model="reservationRecord.comments" :row="2"
+                                  placeholder="请输入会议内容"></el-input>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogFormVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+                </div>
+            </el-dialog>
+
+        </el-container>
+    </el-container>
+</div>
+<base th:href="@{/}"/>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js "></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="/js/util.js"></script>
+<script src="/js/routes.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

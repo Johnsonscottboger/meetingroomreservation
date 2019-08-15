@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.aning.meetingroomreservation.dao.IMeetingRoomDao">
+    <resultMap id="map" type="com.aning.meetingroomreservation.entity.MeetingRoom">
+        <id column="id" property="id" jdbcType="CHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="location" property="location" jdbcType="VARCHAR"/>
+        <result column="comments" property="comments" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="add" keyProperty="id" keyColumn="id">
+        insert into MeetingRoom (id, name, location, comments)
+        values (#{id}, #{name}, #{location}, #{comments})
+    </insert>
+
+    <delete id="delete">
+        delete from MeetingRoom
+        where id = #{id}
+    </delete>
+
+    <update id="update">
+        update MeetingRoom
+        set name = #{name},
+            location = #{location},
+            comments = #{comments}
+        where id = #{id}
+    </update>
+
+    <insert id="addOrUpdate">
+        replace into MeetingRoom (id, name, location, comments)
+        values (#{id}, #{name}, #{location}, #{comments})
+    </insert>
+
+    <select id="getAll" resultMap="map">
+        select * from MeetingRoom
+    </select>
+
+    <select id="getById" resultMap="map">
+        select * from MeetingRoom
+        where id = #{id}
+    </select>
+</mapper>
