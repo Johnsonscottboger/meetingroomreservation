@@ -20,7 +20,7 @@ public class MeetingRoomController {
      * 首页
      */
     @GetMapping("/index")
-    public fun index():String{
+    public fun index(): String {
         return "meetingroom/index"
     }
 
@@ -79,16 +79,14 @@ public class MeetingRoomController {
 
     ///删除会议室
     @ResponseBody
-    @RequestMapping("/{id}", method = [RequestMethod.DELETE])
-    public fun deleteMeetingRoom(@PathVariable("id") id: String):Json{
+    @RequestMapping("", method = [RequestMethod.DELETE])
+    public fun deleteMeetingRoom(request: HttpServletRequest, meetingRoom: MeetingRoom): Json {
         val operation = "删除会议室"
-        return try{
-            val meetingRoom = this._service.getById(id)
-            if(meetingRoom != null)
-                this._service.delete(meetingRoom)
+        return try {
+            this._service.delete(meetingRoom)
             Json.succ(operation)
-        } catch (ex: Exception){
-            Json.fail(operation, message =  ex.message!!)
+        } catch (ex: Exception) {
+            Json.fail(operation, message = ex.message!!)
         }
     }
 }
