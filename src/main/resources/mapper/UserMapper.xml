@@ -41,11 +41,17 @@
 
     <select id="getAll" resultMap="userMap">
         select * from User
+        order by department
     </select>
 
     <select id="getById" resultMap="userMap">
         select * from User
         where id = #{id}
+    </select>
+
+    <select id="getByIP" resultMap="userMap">
+        select * from User
+        where ip = #{ip}
     </select>
 
     <select id="getByName" resultMap="userMap">

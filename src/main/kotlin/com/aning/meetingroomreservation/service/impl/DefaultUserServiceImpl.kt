@@ -24,7 +24,7 @@ public class DefaultUserServiceImpl : IUserService {
      * 添加 [User] 记录
      * @param users 添加的 [User] 集合
      */
-    override fun addRange(users: List<User>){
+    override fun addRange(users: List<User>) {
         this._dao.addRange(users)
     }
 
@@ -69,6 +69,14 @@ public class DefaultUserServiceImpl : IUserService {
         return this._dao.getById(id)
     }
 
+    /**
+     * 获取指定 [ip] 的 [User] 记录
+     * @param ip 指定的 [User] IP地址
+     * @return [User] 记录
+     */
+    override fun getByIP(ip: String): User? {
+        return this._dao.getByIP(ip)
+    }
 
     /**
      * 获取指定 [name] 的 [User] 记录

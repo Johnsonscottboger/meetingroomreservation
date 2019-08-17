@@ -78,7 +78,7 @@ public class UserController {
                 user.id = UUID.randomUUID().toString()
             user.ip = IPUtil.getIPAddress(request)
             this._service.addOrUpdate(user)
-            Json.succ(operation)
+            Json.succ(operation, data = user)
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)
         }

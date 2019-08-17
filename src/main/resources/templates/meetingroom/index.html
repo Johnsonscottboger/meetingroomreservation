@@ -16,6 +16,7 @@
 
         <div class="table-container">
             <el-table :data="meetingroomList" v-loading="loading" stripe>
+                <el-table-column type="index" width="50"></el-table-column>
                 <el-table-column prop="name" width="200" label="名称"></el-table-column>
                 <el-table-column prop="location" width="300" label="位置"></el-table-column>
                 <el-table-column prop="comments" label="备注"></el-table-column>

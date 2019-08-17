@@ -76,6 +76,24 @@
                 </div>
             </el-dialog>
 
+            <el-dialog title="选择姓名" :visible.sync="showLoginDialog">
+                <el-form :model="login" :rules="loginRules" ref="login" label-width="80px">
+                    <el-form-item label="姓名" prop="name">
+                        <el-select v-model="login.id" filterable>
+                            <el-option
+                                v-for="item in users"
+                                :key="item.id"
+                                :value="item.id"
+                                :label="item.name">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+                <div slot="footer" class="dialog-footer">
+                    <el-button type="primary" @click="handleLogin('login')">确 定</el-button>
+                    <el-button @click="handleCancel('login')">取 消</el-button>
+                </div>
+            </el-dialog>
         </el-container>
     </el-container>
 </div>
@@ -86,8 +104,9 @@
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="/js/util.js"></script>
 <script src="/js/routes.js"></script>
-<script src="/js/main.js"></script>
 <script src="/api/meetingroom.js"></script>
 <script src="/api/user.js"></script>
+<script src="/api/reservation.js"></script>
+<script src="/js/main.js"></script>
 </body>
 </html>

@@ -52,6 +52,13 @@ public interface IUserDao {
     public fun getById(id: String): User?
 
     /**
+     * 获取指定 [ip] 的 [User] 记录
+     * @param ip 指定的 [User] IP地址
+     * @return [User] 记录
+     */
+    public fun getByIP(ip: String): User?
+
+    /**
      * 获取指定 [name] 的 [User] 记录
      * @param name 指定的 [User] 名称
      * @return [User] 记录

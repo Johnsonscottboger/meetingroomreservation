@@ -3,12 +3,11 @@
         <div class="search-container">
             <el-form :inline="true" :model="search">
                 <el-form-item>
-                    <!--                        <el-button icon="el-icon-plus" @click="handleImport()">导入</el-button>-->
                     <el-upload action="/file/import"
                                :show-file-list="false"
                                :on-success="handleUploadSuccess"
                                :on-error="handleUploadFail">
-                        <el-button slot="trigger" type="primary">导入</el-button>
+                        <el-button slot="trigger" icon="el-icon-upload2">导入</el-button>
                     </el-upload>
                 </el-form-item>
                 <el-form-item>
@@ -140,13 +139,18 @@
                 var target = this;
                 userApi.importUsers(target.importUserList)
                     .then(function (response) {
-                        if(!response.data.succ){
+                        if (!response.data.succ) {
                             target.$message.error(response.data.mesg);
                         } else {
                             target.showDialog = false;
                             target.handleLoad();
                         }
+                    }).catch(function (error) {
+                    target.$notify.error({
+                        title: '错误',
+                        message: error.message
                     })
+                })
             },
 
             /**

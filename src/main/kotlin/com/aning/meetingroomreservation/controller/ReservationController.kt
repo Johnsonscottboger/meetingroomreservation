@@ -14,7 +14,7 @@ import java.util.*
 import javax.servlet.http.HttpServletRequest
 
 @Controller
-@RequestMapping("reserve")
+@RequestMapping("/reserve")
 public class ReservationController {
     @Autowired
     private lateinit var _userService: IUserService

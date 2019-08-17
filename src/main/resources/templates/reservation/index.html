@@ -1,57 +1,155 @@
 <!--预约-首页-->
 <template>
-    <el-row>
-        <!--calender-->
-        <el-col style="width: 45%">
-            <el-card class="box-card">
-                <el-calendar v-model="date"></el-calendar>
-            </el-card>
-        </el-col>
+    <div>
+        <el-row>
+            <!--calender-->
+            <el-col style="width: 45%">
+                <el-card class="box-card">
+                    <el-calendar v-model="date"></el-calendar>
+                </el-card>
+            </el-col>
 
-        <!--reservation list-->
-        <el-col style="width: 50%">
-            <el-table :data="reservationList">
-                <el-table-column prop="name" label="会议室预约"></el-table-column>
-                <el-table-column prop="start"></el-table-column>
-                <el-table-column prop="end"></el-table-column>
-                <el-table-column prop="status"></el-table-column>
-                <el-table-column width="60">
-                    <template slot-scope="scope">
-                        <el-link icon="el-icon-edit" :underline="false"
-                                 @click="handleEdit(scope.$index, scope.row)"></el-link>
-                    </template>
-                </el-table-column>
-            </el-table>
-        </el-col>
-    </el-row>
+            <!--reservation list-->
+            <el-col style="width: 50%">
+                <el-table :data="reservationList">
+                    <el-table-column prop="name" label="会议室预约"></el-table-column>
+                    <el-table-column prop="start"></el-table-column>
+                    <el-table-column prop="end"></el-table-column>
+                    <el-table-column prop="status"></el-table-column>
+                    <el-table-column width="60">
+                        <template slot-scope="scope">
+                            <el-link icon="el-icon-edit" :underline="false"
+                                     @click="handleEdit(scope.$index, scope.row)"></el-link>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </el-col>
+        </el-row>
+
+        <el-dialog title="预定会议室" :visible.sync="showDialog">
+            <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="80px">
+                <el-form-item label="会议室" prop="meetingroom">
+                    <el-input v-model="reservationRecord.meetingroom"></el-input>
+                </el-form-item>
+                <el-form-item label="起止时间" required>
+                    <el-row>
+                        <el-col :span="11">
+                            <el-form-item prop="start">
+                                <el-date-picker v-model="reservationRecord.start" type="datetime"
+                                                style="width: 100%"
+                                                placeholder="选择开始时间"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                        <el-col class="line" :span="2" style="text-align: center">-</el-col>
+                        <el-col :span="11">
+                            <el-form-item prop="end">
+                                <el-date-picker v-model="reservationRecord.end" type="datetime"
+                                                style="width: 100%"
+                                                placeholder="选择结束时间"></el-date-picker>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form-item>
+                <el-form-item label="会议内容">
+                    <el-input type="textarea" v-model="reservationRecord.comments" :row="2"
+                              placeholder="请输入会议内容"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="handleSubmit('reservationRecord')">确 定</el-button>
+                <el-button @click="handleCancel('reservationRecord')">取 消</el-button>
+            </div>
+        </el-dialog>
+    </div>
 </template>
 
 <script>
     exports = {
         data: function () {
             return {
+                showDialog: false,
                 date: new Date(),
-                reservationList: [{
-                    name: '大会议室',
-                    start: '09:00',
-                    end: '10:00',
-                    status: '使用中'
-                }, {
-                    name: '大会议室',
-                    start: '10:30',
-                    end: '11:00',
-                    status: '等待中'
-                }, {
-                    name: '视频会议室',
-                    start: '11:00',
-                    end: '12:00',
-                    status: '等待中'
-                }]
+                reservationList: [],
+                reservationRecord: {
+                    id: '',
+                    meetingroom: '',
+                    start: '',
+                    end: '',
+                    comments: ''
+                },
+                rules: {
+                    meetingroom: [
+                        {required: true, message: '请选择会议室', trigger: 'blur'}
+                    ],
+                    start: [
+                        {required: true, message: '请选择开始时间', trigger: 'blur'},
+                        {min: new Date(), message: '请选择现在之后的时间', trigger: 'change'}
+                    ],
+                    end: [
+                        {required: true, message: '请选择结束时间', trigger: 'blur'},
+                        {min: new Date(), message: '请选择开始之后的时间', trigger: 'change'}
+                    ]
+                }
             }
         },
         methods: {
+            /**
+             * 加载
+             */
+            handeleLoad: function () {
+                var target = this;
+                reservationApi.getReservationRecordToady()
+                    .then(function (response) {
+                        if (!response.succ) {
+                            target.$message.error(response.mesg);
+                        }
+                        target.reservationList = response.data;
+                    }).catch(function (response) {
+                    target.$notify.error({
+                        title: '错误',
+                        message: response.message
+                    })
+                })
+            },
+
+            /**
+             * 编辑
+             */
             handleEdit: function (index, row) {
-                console.log(index, row);
+                var target = this;
+                target.reservationRecord = {
+                    id: row.id,
+                    ip: row.ip,
+                    userId: row.userId,
+                    meetingRoomId: row.meetingRoomId,
+                    startTime: row.startTime,
+                    endTime: row.endTime,
+                    status: row.status
+                };
+                target.showDialog = true;
+            },
+
+            /**
+             * 提交
+             */
+            handleSubmit: function (formName) {
+                this.$refs[formName].validate(function (valid) {
+                    if (valid) {
+                        alert('submit!');
+                        app.showDialog = false;
+                    } else {
+                        console.log('valid error');
+                        return false;
+                    }
+                });
+            },
+
+            /**
+             * 取消
+             */
+            handleCancel: function (formName) {
+                this.$refs[formName].resetFields();
+                app.showDialog = false;
             }
         }
     }
