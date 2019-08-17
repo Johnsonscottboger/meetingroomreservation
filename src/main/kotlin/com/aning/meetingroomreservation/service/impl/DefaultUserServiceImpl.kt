@@ -10,7 +10,7 @@ import javax.annotation.Resource
 public class DefaultUserServiceImpl : IUserService {
 
     @Resource
-    private lateinit var _dao : IUserDao
+    private lateinit var _dao: IUserDao
 
     /**
      * 添加 [User] 记录
@@ -18,6 +18,14 @@ public class DefaultUserServiceImpl : IUserService {
      */
     override fun add(user: User) {
         this._dao.add(user)
+    }
+
+    /**
+     * 添加 [User] 记录
+     * @param users 添加的 [User] 集合
+     */
+    override fun addRange(users: List<User>){
+        this._dao.addRange(users)
     }
 
     /**
@@ -59,5 +67,15 @@ public class DefaultUserServiceImpl : IUserService {
      */
     override fun getById(id: String): User? {
         return this._dao.getById(id)
+    }
+
+
+    /**
+     * 获取指定 [name] 的 [User] 记录
+     * @param name 指定的 [User] 名称
+     * @return [User] 记录
+     */
+    override fun getByName(name: String): List<User> {
+        return this._dao.getByName(name)
     }
 }

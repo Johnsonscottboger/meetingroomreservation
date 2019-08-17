@@ -1,21 +1,201 @@
 <template>
-    <div id="user">
-        <h1>Hello User Index</h1>
-        <h2>{{message}}</h2>
+    <div>
+        <div class="search-container">
+            <el-form :inline="true" :model="search">
+                <el-form-item>
+                    <!--                        <el-button icon="el-icon-plus" @click="handleImport()">导入</el-button>-->
+                    <el-upload action="/file/import"
+                               :show-file-list="false"
+                               :on-success="handleUploadSuccess"
+                               :on-error="handleUploadFail">
+                        <el-button slot="trigger" type="primary">导入</el-button>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item>
+                    <el-input v-model="search.name" placeholder="姓名"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button icon="el-icon-search" type="primary" @click="handleSearch('search')">查询</el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+
+        <div class="table-container">
+            <el-table :data="userList" v-loading="loading" stripe>
+                <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column prop="department" width="200" label="部门"></el-table-column>
+                <el-table-column prop="name" label="姓名"></el-table-column>
+                <el-table-column width="200">
+                    <template slot-scope="scope">
+                        <el-link icon="el-icon-delete" :underline="false"
+                                 @click="handleDelete(scope.$index, scope.row)">删除
+                        </el-link>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+
+        <el-dialog title="人员列表" :visible.sync="showDialog">
+            <el-table :data="importUserList">
+                <el-table-column type="index" width="50"></el-table-column>
+                <el-table-column prop="department" label="部门"></el-table-column>
+                <el-table-column prop="name" label="姓名"></el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button type="primary" @click="handleSubmit">确 定</el-button>
+                <el-button @click="handleCancel">取 消</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 <script>
     exports = {
         data: function () {
             return {
-                message: 'Hello Vue!'
+                showDialog: false,
+                loading: false,
+                search: {
+                    name: ''
+                },
+                user: {
+                    id: '',
+                    ip: '',
+                    name: '',
+                    department: ''
+                },
+                userList: [],
+                importUserList: []
             }
+        },
+        methods: {
+            /**
+             * 加载
+             */
+            handleLoad: function () {
+                var target = this;
+                target.loading = true;
+                setTimeout(function () {
+                    userApi.getUserList()
+                        .then(function (response) {
+                            if (!response.data.succ) {
+                                target.$message.error(response.data.mesg);
+                            }
+                            target.loading = false;
+                            target.userList = response.data.data;
+                        }).catch(function (error) {
+                        target.$notify.error({
+                            title: '错误',
+                            message: error.message
+                        })
+                    })
+                }, 500);
+            },
+
+            /**
+             * 查询
+             */
+            handleSearch: function () {
+                var target = this;
+                target.loading = true;
+                userApi.searchUser({
+                    name: target.search.name
+                }).then(function (response) {
+                    if (!response.data.succ) {
+                        target.$message.error(response.data.mesg);
+                    }
+                    target.loading = false;
+                    target.userList = response.data.data;
+                }).catch(function (error) {
+                    target.$notify.error({
+                        title: '错误',
+                        message: error.message
+                    })
+                });
+            },
+
+            /**
+             * 上传成功
+             */
+            handleUploadSuccess: function (response, file, fileList) {
+                var target = this;
+                if (response.succ) {
+                    target.showDialog = true;
+                    target.importUserList = response.data
+                } else {
+                    target.$message.error(response.mesg);
+                }
+            },
+
+            /**
+             * 上传失败
+             */
+            handleUploadFail: function (response, file, fileList) {
+                target.$message.error(response);
+            },
+
+            /**
+             * 提交
+             */
+            handleSubmit: function () {
+                var target = this;
+                userApi.importUsers(target.importUserList)
+                    .then(function (response) {
+                        if(!response.data.succ){
+                            target.$message.error(response.data.mesg);
+                        } else {
+                            target.showDialog = false;
+                            target.handleLoad();
+                        }
+                    })
+            },
+
+            /**
+             * 取消
+             */
+            handleCancel: function () {
+                this.showDialog = false;
+                this.importUserList = []
+            },
+
+            /**
+             * 删除
+             */
+            handleDelete: function (index, row) {
+                var target = this;
+                if (row) {
+                    target.$confirm('确定要删除当前记录吗？', '提示')
+                        .then(function () {
+                            userApi.deleteUser({
+                                id: row.id,
+                                ip: row.ip,
+                                name: row.name,
+                                department: row.department
+                            }).then(function (response) {
+                                target.$message({
+                                    message: '删除成功',
+                                    type: 'success'
+                                });
+                                target.handleLoad();
+                            }).catch(function (error) {
+                                target.$notify.error({
+                                    title: '错误',
+                                    message: error.message
+                                })
+                            });
+                        });
+                }
+            }
+        },
+        mounted: function () {
+            this.handleLoad()
         }
     }
 </script>
 
 <style scoped>
-    #user {
-        /*background: red;*/
+    .search-container {
+        background: rgba(255, 255, 255, 1);
+        border-radius: 2px;
+        padding: 18px 18px 0;
     }
 </style>

@@ -82,21 +82,47 @@
              * 加载
              */
             handleLoad: function () {
-                console.log("Handle Load");
                 var target = this;
                 target.loading = true;
-                meetingroomApi.getMeetingRoomList()
-                    .then(function (response) {
-                        target.loading = false;
-                        target.meetingroomList = response.data.data;
+                setTimeout(function () {
+                    meetingroomApi.getMeetingRoomList()
+                        .then(function (response) {
+                            console.log("Handle Load");
+                            target.loading = false;
+                            if (!response.data.succ) {
+                                target.$message.error(response.data.mesg);
+                            }
+                            target.meetingroomList = response.data.data;
+                        }).catch(function (error) {
+                        target.$notify.error({
+                            title: '错误',
+                            message: error.message
+                        })
                     });
+                }, 500);
             },
 
             /**
              * 查询
              */
             handleSearch: function (searchForm) {
-                this.handleLoad()
+                console.log("Handle Search");
+                var target = this;
+                target.loading = true;
+                meetingroomApi.searchMeetingRoom({
+                    name: target.search.meetingroom
+                }).then(function (response) {
+                    target.loading = false;
+                    if (!response.data.succ) {
+                        target.$message.error(response.data.mesg);
+                    }
+                    target.meetingroomList = response.data.data;
+                }).catch(function (error) {
+                    target.$notify.error({
+                        title: '错误',
+                        message: error.message
+                    })
+                });
             },
 
             /**
@@ -112,6 +138,7 @@
                         if (valid) {
                             meetingroomApi.addMeetingRoom(target.meetingroom);
                             target.showDialog = false;
+                            target._resetMeetingroom();
                             target.handleLoad();
                         } else {
                             return false;
@@ -126,13 +153,12 @@
             handleEdit: function (index, row) {
                 console.log("Handle Edit");
                 var target = this;
-                var current = {
+                target.meetingroom = {
                     id: row.id,
                     name: row.name,
                     location: row.location,
                     comments: row.comments
                 };
-                target.meetingroom = current;
                 target.showDialog = true;
             },
 
@@ -143,14 +169,35 @@
                 console.log("Handle Delete");
                 var target = this;
                 if (row) {
-                    meetingroomApi.deleteMeetingRoom({
-                        id: row.id,
-                        name: row.name,
-                        location: row.location,
-                        comments: row.comments
-                    }).then(function (response) {
-                        target.handleLoad();
-                    });
+                    target.$confirm('确定要删除当前记录？', '提示')
+                        .then(function () {
+                            meetingroomApi.deleteMeetingRoom({
+                                id: row.id,
+                                name: row.name,
+                                location: row.location,
+                                comments: row.comments
+                            }).then(function (response) {
+                                target.$message({
+                                    message: '删除成功',
+                                    type: 'success'
+                                });
+                                target.handleLoad();
+                            }).catch(function (error) {
+                                target.$notify.error({
+                                    title: '错误',
+                                    message: error.message
+                                })
+                            });
+                        });
+                }
+            },
+
+            _resetMeetingroom: function () {
+                this.meetingroom = {
+                    id: '',
+                    name: '',
+                    location: '',
+                    comments: ''
                 }
             }
         },

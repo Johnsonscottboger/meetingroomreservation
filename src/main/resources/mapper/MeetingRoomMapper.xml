@@ -6,11 +6,12 @@
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="location" property="location" jdbcType="VARCHAR"/>
         <result column="comments" property="comments" jdbcType="VARCHAR"/>
+        <result column="createDateTime" property="createDateTime" jdbcType="DATE"/>
     </resultMap>
 
     <insert id="add" keyProperty="id" keyColumn="id">
-        insert into MeetingRoom (id, name, location, comments)
-        values (#{id}, #{name}, #{location}, #{comments})
+        insert into MeetingRoom (id, name, location, comments, createDateTime)
+        values (#{id}, #{name}, #{location}, #{comments}, #{createDateTime})
     </insert>
 
     <delete id="delete">
@@ -22,21 +23,30 @@
         update MeetingRoom
         set name = #{name},
             location = #{location},
-            comments = #{comments}
+            comments = #{comments},
+            createDateTime = #{createDateTime}
         where id = #{id}
     </update>
 
     <insert id="addOrUpdate">
-        replace into MeetingRoom (id, name, location, comments)
-        values (#{id}, #{name}, #{location}, #{comments})
+        replace into MeetingRoom (id, name, location, comments, createDateTime)
+        values (#{id}, #{name}, #{location}, #{comments}, #{createDateTime})
     </insert>
 
     <select id="getAll" resultMap="map">
         select * from MeetingRoom
+        order by createDateTime
     </select>
 
     <select id="getById" resultMap="map">
         select * from MeetingRoom
         where id = #{id}
+        order by createDateTime
+    </select>
+
+    <select id="getByName" resultMap="map">
+        select * from MeetingRoom
+        where name like concat('%', #{name}, '%')
+        order by createDateTime
     </select>
 </mapper>

@@ -10,6 +10,9 @@ import java.util.*
 import javax.servlet.http.HttpServletRequest
 import kotlin.Exception
 
+/**
+ * 会议室管理控制器
+ */
 @Controller
 @RequestMapping("/meetingroom")
 public class MeetingRoomController {
@@ -29,10 +32,13 @@ public class MeetingRoomController {
      */
     @ResponseBody
     @GetMapping("")
-    public fun getMeetingRoomList(): Json {
+    public fun getMeetingRoomList(@RequestParam("name") name: String?): Json {
         val operation = "获取会议室列表"
         return try {
-            val meetingRooms = this._service.getAll()
+            val meetingRooms = if (name.isNullOrBlank())
+                this._service.getAll()
+            else
+                this._service.getByName(name!!)
             Json.succ(operation, data = meetingRooms)
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)

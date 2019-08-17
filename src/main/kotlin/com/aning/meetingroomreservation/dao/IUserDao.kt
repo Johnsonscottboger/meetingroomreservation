@@ -15,6 +15,12 @@ public interface IUserDao {
     public fun add(user: User)
 
     /**
+     * 添加 [User] 记录
+     * @param users 添加的 [User] 集合
+     */
+    public fun addRange(users: List<User>)
+
+    /**
      * 删除 [User] 记录
      * @param user 删除的 [User] 实例
      */
@@ -44,4 +50,11 @@ public interface IUserDao {
      * @return [User] 记录
      */
     public fun getById(id: String): User?
+
+    /**
+     * 获取指定 [name] 的 [User] 记录
+     * @param name 指定的 [User] 名称
+     * @return [User] 记录
+     */
+    public fun getByName(name:String):List<User>
 }

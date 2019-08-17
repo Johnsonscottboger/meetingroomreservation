@@ -30,10 +30,13 @@ public class UserController {
      */
     @ResponseBody
     @GetMapping("")
-    public fun getUserList(): Json {
+    public fun getUserList(@RequestParam("name") name: String?): Json {
         val operation = "获取用户列表"
         return try {
-            val users = this._service.getAll()
+            val users = if (name.isNullOrEmpty())
+                this._service.getAll()
+            else
+                this._service.getByName(name!!)
             Json.succ(operation, data = users)
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)
@@ -85,13 +88,33 @@ public class UserController {
      * 删除用户
      */
     @ResponseBody
-    @RequestMapping("/{id}", method = [RequestMethod.DELETE])
-    public fun deleteUser(@PathVariable("id") id: String): Json {
+    @RequestMapping("", method = [RequestMethod.DELETE])
+    public fun deleteUser(request: HttpServletRequest, user: User): Json {
         val operation = "删除用户"
         return try {
-            val user = this._service.getById(id)
-            if (user != null)
-                this._service.delete(user)
+            this._service.delete(user)
+            Json.succ(operation)
+        } catch (ex: Exception) {
+            Json.fail(operation, message = ex.message!!)
+        }
+    }
+
+    /**
+     * 导入用户
+     */
+    @ResponseBody
+    @RequestMapping("/import", method = [RequestMethod.POST])
+    public fun importUsers(request: HttpServletRequest, @RequestBody users: List<User>): Json {
+        val operation = "导入用户"
+        return try {
+            val usersExists = this._service.getAll()
+            val added = users.filter { p ->
+                !usersExists.any { x -> x.name == p.name && x.department == p.department }
+            }.map { p ->
+                p.id = UUID.randomUUID().toString()
+                return@map p
+            }
+            this._service.addRange(added)
             Json.succ(operation)
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)

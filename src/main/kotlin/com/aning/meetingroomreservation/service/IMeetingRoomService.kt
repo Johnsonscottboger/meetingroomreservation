@@ -43,4 +43,11 @@ public interface IMeetingRoomService {
      * @return [MeetingRoom] 记录
      */
     public fun getById(id: String): MeetingRoom?
+
+    /**
+     * 获取指定 [name] 的 [MeetingRoom] 记录, 支持模糊查找
+     * @param name 指定的 [MeetingRoom] 名称
+     * @return [MeetingRoom] 记录
+     */
+    public fun getByName(name: String) : List<MeetingRoom>
 }

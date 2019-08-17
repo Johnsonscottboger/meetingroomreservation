@@ -8,6 +8,7 @@ import javax.annotation.Resource
 
 @Service
 public class DefaultMeetingRoomServiceImpl : IMeetingRoomService {
+
     @Resource
     private lateinit var _dao: IMeetingRoomDao
 
@@ -58,5 +59,14 @@ public class DefaultMeetingRoomServiceImpl : IMeetingRoomService {
      */
     override fun getById(id: String): MeetingRoom? {
         return this._dao.getById(id)
+    }
+
+    /**
+     * 获取指定 [name] 的 [MeetingRoom] 记录, 支持模糊查找
+     * @param name 指定的 [MeetingRoom] 名称
+     * @return [MeetingRoom] 记录
+     */
+    override fun getByName(name: String): List<MeetingRoom> {
+        return this._dao.getByName(name)
     }
 }

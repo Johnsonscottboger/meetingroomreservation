@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.entity
 
+import java.util.*
 import kotlin.reflect.full.memberProperties
 import kotlin.text.StringBuilder
 
@@ -25,5 +26,10 @@ public data class MeetingRoom(
         /**
          * 备注
          */
-        var comments: String = ""
+        var comments: String = "",
+
+        /**
+         * 创建时间
+         */
+        var createDateTime : Date = Date()
 )

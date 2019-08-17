@@ -23,6 +23,15 @@ var meetingroomApi = {
     },
 
     /**
+     * 查找会议室
+     */
+    searchMeetingRoom: function (params) {
+        return request.get('/meetingroom', {
+            params: params
+        });
+    },
+
+    /**
      * 添加会议室
      */
     addMeetingRoom: function (meetingRoom) {

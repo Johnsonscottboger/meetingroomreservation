@@ -13,6 +13,14 @@
         values (#{id}, #{ip}, #{name}, #{department})
     </insert>
 
+    <insert id="addRange">
+        insert into User (id, ip, name, department)
+        values
+        <foreach collection="list" item="user" index="index" separator=",">
+            (#{user.id}, #{user.ip}, #{user.name}, #{user.department})
+        </foreach>
+    </insert>
+
     <delete id="delete">
         delete from User
         where id = #{id}
@@ -38,5 +46,10 @@
     <select id="getById" resultMap="userMap">
         select * from User
         where id = #{id}
+    </select>
+
+    <select id="getByName" resultMap="userMap">
+        select * from User
+        where name like concat('%', #{name}, '%')
     </select>
 </mapper>
