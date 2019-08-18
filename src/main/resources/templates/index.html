@@ -27,13 +27,13 @@
                 <el-menu :default-openeds="['/reserve-index']" :default-active="$route.path" :collapse="collapse"
                          @select="handleSelect">
                     <el-menu-item index="/reserve-index">
-                        <i class="el-icon-message"></i><span slot="title">预约</span>
+                        <i class="el-icon-message"></i><span slot="title">预&nbsp;&nbsp;约</span>
                     </el-menu-item>
                     <el-menu-item index="/meetingroom-index">
                         <i class="el-icon-menu"></i><span slot="title">会议室</span>
                     </el-menu-item>
                     <el-menu-item index="/user-index">
-                        <i class="el-icon-setting"></i><span slot="title">用户</span>
+                        <i class="el-icon-setting"></i><span slot="title">用&nbsp;&nbsp;户</span>
                     </el-menu-item>
                 </el-menu>
             </el-aside>
@@ -41,26 +41,48 @@
                 <router-view></router-view>
             </el-main>
 
-            <el-dialog title="预定会议室" :visible.sync="showDialog">
-                <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="80px">
+            <el-dialog title="预约会议室" :visible.sync="showDialog">
+                <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="90px">
+                    <el-form-item label="日期" prop="date">
+                        <el-date-picker v-model="reservationRecord.date" style="width:100%"
+                                        type="date"
+                                        format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+                    </el-form-item>
                     <el-form-item label="会议室" prop="meetingroom">
-                        <el-input v-model="reservationRecord.meetingroom"></el-input>
+                        <el-select v-model="reservationRecord.meetingroom" filterable style="width:100%">
+                            <el-option
+                                    v-for="item in meetingrooms"
+                                    :key="item.id"
+                                    :value="item.id"
+                                    :label="item.name">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                     <el-form-item label="起止时间" required>
                         <el-row>
                             <el-col :span="11">
                                 <el-form-item prop="start">
-                                    <el-date-picker v-model="reservationRecord.start" type="datetime"
-                                                    style="width: 100%"
-                                                    placeholder="选择开始时间"></el-date-picker>
+                                    <el-time-select v-model="reservationRecord.start" style="width: 100%"
+                                                    :picker-options="{
+                                                        start : '08:30',
+                                                        step: '00:05',
+                                                        end: '21:00',
+                                                        minTime: now
+                                                    }"
+                                                    palceholder="选择开始时间"></el-time-select>
                                 </el-form-item>
                             </el-col>
                             <el-col class="line" :span="2" style="text-align: center">-</el-col>
                             <el-col :span="11">
                                 <el-form-item prop="end">
-                                    <el-date-picker v-model="reservationRecord.end" type="datetime"
-                                                    style="width: 100%"
-                                                    placeholder="选择结束时间"></el-date-picker>
+                                    <el-time-select v-model="reservationRecord.end" style="width: 100%"
+                                                    :picker-options="{
+                                                        start : '08:30',
+                                                        step: '00:05',
+                                                        end: '21:00',
+                                                        minTime: reservationRecord.start
+                                                    }"
+                                                    palceholder="选择结束时间"></el-time-select>
                                 </el-form-item>
                             </el-col>
                         </el-row>
@@ -81,10 +103,10 @@
                     <el-form-item label="姓名" prop="name">
                         <el-select v-model="login.id" filterable>
                             <el-option
-                                v-for="item in users"
-                                :key="item.id"
-                                :value="item.id"
-                                :label="item.name">
+                                    v-for="item in users"
+                                    :key="item.id"
+                                    :value="item.id"
+                                    :label="item.name">
                             </el-option>
                         </el-select>
                     </el-form-item>

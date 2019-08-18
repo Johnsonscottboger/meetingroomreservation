@@ -11,11 +11,11 @@
 
             <!--reservation list-->
             <el-col style="width: 50%">
-                <el-table :data="reservationList">
+                <el-table :data="reservationList" :row-class-name="tableRowClassName">
                     <el-table-column prop="name" label="会议室预约"></el-table-column>
-                    <el-table-column prop="start"></el-table-column>
-                    <el-table-column prop="end"></el-table-column>
-                    <el-table-column prop="status"></el-table-column>
+                    <el-table-column prop="startTime"></el-table-column>
+                    <el-table-column prop="endTime"></el-table-column>
+                    <el-table-column prop="statusDesc"></el-table-column>
                     <el-table-column width="60">
                         <template slot-scope="scope">
                             <el-link icon="el-icon-edit" :underline="false"
@@ -26,26 +26,53 @@
             </el-col>
         </el-row>
 
-        <el-dialog title="预定会议室" :visible.sync="showDialog">
-            <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="80px">
+        <el-dialog title="预约会议室" :visible.sync="showDialog">
+            <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="90px">
+                <el-form-item label="取消预约" prop="cancel"
+                              v-if="reservationRecord.status === 0 || reservationRecord.status === 1">
+                    <el-switch v-model="reservationRecord.cancel"
+                               active-color="#ff4949"></el-switch>
+                </el-form-item>
+                <el-form-item label="日期" prop="date">
+                    <el-date-picker v-model="reservationRecord.date" style="width:100%"
+                                    type="date"
+                                    format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
+                </el-form-item>
                 <el-form-item label="会议室" prop="meetingroom">
-                    <el-input v-model="reservationRecord.meetingroom"></el-input>
+                    <el-select v-model="reservationRecord.meetingroom" filterable style="width:100%">
+                        <el-option
+                                v-for="item in meetingrooms"
+                                :key="item.id"
+                                :value="item.id"
+                                :label="item.name">
+                        </el-option>
+                    </el-select>
                 </el-form-item>
                 <el-form-item label="起止时间" required>
                     <el-row>
                         <el-col :span="11">
                             <el-form-item prop="start">
-                                <el-date-picker v-model="reservationRecord.start" type="datetime"
-                                                style="width: 100%"
-                                                placeholder="选择开始时间"></el-date-picker>
+                                <el-time-select v-model="reservationRecord.start" style="width: 100%"
+                                                :picker-options="{
+                                                        start : '08:30',
+                                                        step: '00:05',
+                                                        end: '21:00',
+                                                        minTime: now
+                                                    }"
+                                                palceholder="选择开始时间"></el-time-select>
                             </el-form-item>
                         </el-col>
                         <el-col class="line" :span="2" style="text-align: center">-</el-col>
                         <el-col :span="11">
                             <el-form-item prop="end">
-                                <el-date-picker v-model="reservationRecord.end" type="datetime"
-                                                style="width: 100%"
-                                                placeholder="选择结束时间"></el-date-picker>
+                                <el-time-select v-model="reservationRecord.end" style="width: 100%"
+                                                :picker-options="{
+                                                        start : '08:30',
+                                                        step: '00:05',
+                                                        end: '21:00',
+                                                        minTime: reservationRecord.start
+                                                    }"
+                                                palceholder="选择结束时间"></el-time-select>
                             </el-form-item>
                         </el-col>
                     </el-row>
@@ -69,25 +96,30 @@
             return {
                 showDialog: false,
                 date: new Date(),
+                now: new Date().getHours() + ":" + new Date().getMinutes(),
+                meetingrooms: [],
                 reservationList: [],
                 reservationRecord: {
                     id: '',
-                    meetingroom: '',
-                    start: '',
-                    end: '',
+                    userId: '',
+                    date: new Date(),
+                    meetingroom: null,
+                    start: null,
+                    end: null,
                     comments: ''
                 },
                 rules: {
+                    date: [
+                        {required: true, message: '请选择日期', trigger: 'blur'}
+                    ],
                     meetingroom: [
                         {required: true, message: '请选择会议室', trigger: 'blur'}
                     ],
                     start: [
-                        {required: true, message: '请选择开始时间', trigger: 'blur'},
-                        {min: new Date(), message: '请选择现在之后的时间', trigger: 'change'}
+                        {required: true, message: '请选择开始时间', trigger: 'blur'}
                     ],
                     end: [
-                        {required: true, message: '请选择结束时间', trigger: 'blur'},
-                        {min: new Date(), message: '请选择开始之后的时间', trigger: 'change'}
+                        {required: true, message: '请选择结束时间', trigger: 'blur'}
                     ]
                 }
             }
@@ -96,14 +128,18 @@
             /**
              * 加载
              */
-            handeleLoad: function () {
+            handleLoad: function () {
                 var target = this;
                 reservationApi.getReservationRecordToady()
                     .then(function (response) {
-                        if (!response.succ) {
-                            target.$message.error(response.mesg);
+                        if (!response.data.succ) {
+                            target.$message.error(response.data.mesg);
                         }
-                        target.reservationList = response.data;
+                        target.reservationList = response.data.data.map(function (value) {
+                            var readonly = value.status === -1 || value.status === 2;
+                            value[readonly] = readonly;
+                            return value;
+                        });
                     }).catch(function (response) {
                     target.$notify.error({
                         title: '错误',
@@ -117,14 +153,19 @@
              */
             handleEdit: function (index, row) {
                 var target = this;
+                console.log("Handle Edit");
                 target.reservationRecord = {
                     id: row.id,
                     ip: row.ip,
                     userId: row.userId,
-                    meetingRoomId: row.meetingRoomId,
-                    startTime: row.startTime,
-                    endTime: row.endTime,
-                    status: row.status
+                    date: new Date(row.date),
+                    meetingroom: row.meetingRoomId,
+                    start: row.startTime,
+                    end: row.endTime,
+                    comments: row.comments,
+                    status: row.status,
+                    statusDesc: row.statusDesc,
+                    cancel: row.status === -1
                 };
                 target.showDialog = true;
             },
@@ -133,10 +174,35 @@
              * 提交
              */
             handleSubmit: function (formName) {
+                var target = this;
                 this.$refs[formName].validate(function (valid) {
                     if (valid) {
-                        alert('submit!');
-                        app.showDialog = false;
+                        var date = target.reservationRecord.date.toLocaleDateString() + " ";
+                        var reservation = {
+                            id: target.reservationRecord.id,
+                            userId: app.user,
+                            meetingRoomId: target.reservationRecord.meetingroom,
+                            startTime: new Date(date + target.reservationRecord.start),
+                            endTime: new Date(date + target.reservationRecord.end),
+                            comments: target.reservationRecord.comments,
+                            status: target.reservationRecord.cancel ? -1 : target.reservationRecord.status
+                        };
+                        reservationApi.reserve(reservation)
+                            .then(function (response) {
+                                if (!response.data.succ) {
+                                    target.$message.error(response.data.mesg);
+                                } else {
+                                    target.showDialog = false;
+                                    setTimeout(function () {
+                                        target.handleLoad();
+                                    }, 500);
+                                }
+                            }).catch(function (error) {
+                            target.$notify.error({
+                                title: '错误',
+                                message: error.message
+                            })
+                        });
                     } else {
                         console.log('valid error');
                         return false;
@@ -149,8 +215,48 @@
              */
             handleCancel: function (formName) {
                 this.$refs[formName].resetFields();
-                app.showDialog = false;
+                this.showDialog = false;
+            },
+
+            /**
+             * 加载会议室列表
+             */
+            loadMeetingrooms: function () {
+                var target = this;
+                meetingroomApi.getMeetingRoomList()
+                    .then(function (response) {
+                        if (!response.data.succ) {
+                            target.$message.error(response.data.mesg);
+                        }
+                        target.meetingrooms = response.data.data;
+                    }).catch(function (error) {
+                    target.$notify.error({
+                        title: '错误',
+                        message: error.message
+                    });
+                })
+            },
+
+            /**
+             * 表格行样式
+             */
+            tableRowClassName : function (params) {
+                var row = params.row;
+                if(row.status === -1){
+                    return 'canceled';
+                } else if(row.status === 0){
+                    return 'waiting';
+                } else if(row.status === 1){
+                    return 'using';
+                } else{
+                    return 'finished';
+                }
             }
+        },
+        mounted: function () {
+            this.handleLoad();
+            this.loadMeetingrooms();
+            app.handleRefresh = this.handleLoad;
         }
     }
 </script>
@@ -163,5 +269,21 @@
 
     .el-calendar-table .el-calendar-day {
         height: 40px;
+    }
+
+    .el-table .canceled{
+        /*background: darkorange;*/
+    }
+
+    .el-table .waiting{
+        /*background: antiquewhite;*/
+    }
+
+    .el-table .using {
+        /*background: lightgreen;*/
+    }
+
+    .el-table .finished{
+        /*background: gray;*/
     }
 </style>

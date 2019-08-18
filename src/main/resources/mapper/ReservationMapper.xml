@@ -6,15 +6,16 @@
         <result column="ip" property="ip" jdbcType="CHAR"/>
         <result column="userId" property="userId" jdbcType="CHAR"/>
         <result column="meetingRoomId" property="meetingRoomId" jdbcType="CHAR"/>
-        <result column="startTime" property="startTime" javaType="DATE"/>
-        <result column="endTime" property="endTime" javaType="DATE"/>
+        <result column="startTime" property="startTime" jdbcType="TIMESTAMP"/>
+        <result column="endTime" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="comments" property="comments" jdbcType="VARCHAR"/>
         <result column="status" property="status" jdbcType="INTEGER"/>
-        <result column="reserveTime" property="reserveTime" jdbcType="DATE"/>
+        <result column="reserveTime" property="reserveTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <insert id="add" keyProperty="id" keyColumn="id">
-        insert into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, status, reserveTime)
-        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{status}, #{reserveTime})
+        insert into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, comments, status, reserveTime)
+        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{comments}, #{status}, #{reserveTime})
     </insert>
 
     <delete id="delete">
@@ -29,49 +30,54 @@
             meetingRoomId = #{meetingRoomId},
             startTime = #{startTime},
             endTime = #{endTime},
+            comments = #{comments},
             status = #{status},
             reserveTime = #{reserveTime}
         where id = #{id}
     </update>
 
     <insert id="addOrUpdate">
-        replace into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, status, reserveTime)
-        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{status}, #{reserveTime})
+        replace into ReservationRecord (id, ip, userId, meetingRoomId, startTime, endTime, comments, status, reserveTime)
+        values (#{id}, #{ip}, #{userId}, #{meetingRoomId}, #{startTime}, #{endTime}, #{comments}, #{status}, #{reserveTime})
     </insert>
 
     <update id="updateList">
         update ReservationRecord set
         ip =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{ip}
+            when #{ReservationRecord.id} then #{ReservationRecord.ip}
         </foreach>
         , userId =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{userId}
+            when #{ReservationRecord.id} then #{ReservationRecord.userId}
         </foreach>
         , meetingRoomId =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{meetingRoomId}
+            when #{ReservationRecord.id} then #{ReservationRecord.meetingRoomId}
         </foreach>
         , startTime =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{startTime}
+            when #{ReservationRecord.id} then #{ReservationRecord.startTime}
         </foreach>
         , endTime =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{endTime}
+            when #{ReservationRecord.id} then #{ReservationRecord.endTime}
+        </foreach>
+        , comments =
+        <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
+            when #{ReservationRecord.id} then #{ReservationRecord.comments}
         </foreach>
         , status =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{status}
+            when #{ReservationRecord.id} then #{ReservationRecord.status}
         </foreach>
         , reserveTime =
         <foreach collection="list" item="ReservationRecord" index="index" separator=" " open="case id" close="end">
-            when #{id} then #{reserveTime}
+            when #{ReservationRecord.id} then #{ReservationRecord.reserveTime}
         </foreach>
         where id in
         <foreach collection="list" item="ReservationRecord" index="index" separator="," open="(" close=")">
-            #{id}
+            #{ReservationRecord.id}
         </foreach>
     </update>
 
@@ -109,11 +115,11 @@
 
     <select id="getByDateTime" resultMap="map">
         select * from ReservationRecord
-        where #{start} &lt;= startTime and entTime &gt;= #{end}
+        where #{start} &lt;= startTime and endTime &lt;= #{end}
     </select>
 
     <select id="getByMeetingRoomIdDateTime" resultMap="map">
         select * from ReservationRecord
-        where meetingRoomId = #{meetingRoomId} and #{start} &lt;= startTime and entTime &gt;= #{end}
+        where meetingRoomId = #{meetingRoomId} and ( #{start} between startTime and endTime or #{end} between startTime and endTime)
     </select>
 </mapper>

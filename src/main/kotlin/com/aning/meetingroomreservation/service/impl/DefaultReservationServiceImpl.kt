@@ -132,27 +132,33 @@ public class DefaultReservationServiceImpl : IReservationService {
          */
         val updateList = HashSet<ReservationRecord>()
         for (record in reservationRecords) {
-            if(record.startTime.after(now) && record.status != ReservationStatus.UNUSED.value){
-                record.status = ReservationStatus.UNUSED.value
-                updateList.add(record)
+            if (record.startTime.after(now)) {
+                if (record.status != ReservationStatus.UNUSED.value) {
+                    record.status = ReservationStatus.UNUSED.value
+                    updateList.add(record)
+                }
+                continue
             }
-            if(record.startTime.before(now) && record.status != ReservationStatus.USING.value){
-                record.status = ReservationStatus.USING.value
-                updateList.add(record)
+            if (record.endTime.after(now)) {
+                if (record.status != ReservationStatus.USING.value) {
+                    record.status = ReservationStatus.USING.value
+                    updateList.add(record)
+                }
+                continue
             }
-            if(record.endTime.after(now) && record.status != ReservationStatus.USING.value){
-                record.status = ReservationStatus.USING.value
-                updateList.add(record)
-            }
-            if(record.endTime.before(now) && record.status != ReservationStatus.USED.value){
-                record.status = ReservationStatus.USED.value
-                updateList.add(record)
+            if (record.endTime.before(now)) {
+                if (record.status != ReservationStatus.USED.value) {
+                    record.status = ReservationStatus.USED.value
+                    updateList.add(record)
+                }
+                continue
             }
         }
         try {
-            this._dao.updateList(updateList.toList())
-        }
-        catch (ex: Exception){
+            if (updateList.isNotEmpty()) {
+                this._dao.updateList(updateList.toList())
+            }
+        } catch (ex: Exception) {
             println("更新会议室状态失败!!!")
             ex.printStackTrace()
             throw ex

@@ -38,6 +38,11 @@ public data class ReservationRecord(
         var endTime : Date,
 
         /**
+         * 备注
+         */
+        var comments : String?,
+
+        /**
          * 状态
          * -1 - 取消预订
          * 0 - 未开始
@@ -49,5 +54,7 @@ public data class ReservationRecord(
         /**
          * 预约时间
          */
-        var reserveTime: Date
-)
+        var reserveTime: Date = Date()
+){
+        constructor() : this( "", "", "", "", Date(), Date(), "")
+}
