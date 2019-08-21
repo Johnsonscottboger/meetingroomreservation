@@ -100,8 +100,7 @@ var app = new Vue({
          * 预约
          */
         handleReserve: function () {
-
-
+            this.handleLogin();
             app.showDialog = true
         },
 
