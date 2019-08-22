@@ -20,11 +20,10 @@ import javax.servlet.http.HttpServletRequest
  */
 @Controller
 public class HomeController {
-
-    private val log = LoggerFactory.getLogger(HomeController::class.java)
-
     @Autowired
     private lateinit var _userService: IUserService
+
+    private val log = LoggerFactory.getLogger(HomeController::class.java)
 
     /**
      * 首页
