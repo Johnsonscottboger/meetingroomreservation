@@ -1,8 +1,15 @@
 var util = {
-    _styleRegex: /(?<=<style.*>)[ \s\S]*?(?=<\/style>)/gmi,
-    _styleAttrRegex: /(?<=<style) .+(?=>)/gmi,
-    _htmlRegex: /(?<=<template.*>)[\s\S]*(?=<\/template>)/gmi,
-    _scriptRegex: /(?<=<script.*>)[ \s\S]*?(?=<\/script>)/gmi,
+    _styleStartRegex : /<style.*>/gmi,
+    _styleRegex: /<style.*>[ \s\S]*?(?=<\/style>)/gmi,
+
+    _styleAttrStartRegex : /<style/gmi,
+    _styleAttrRegex: /<style .+(?=>)/gmi,
+
+    _htmlStartRegex : /<template.*>/gmi,
+    _htmlRegex: /<template.*>[\s\S]*(?=<\/template>)/gmi,
+
+    _scriptStartRegex : /<script.*>/gmi,
+    _scriptRegex: /<script.*>[ \s\S]*?(?=<\/script>)/gmi,
 
     /**
      * 解析组件
@@ -10,10 +17,19 @@ var util = {
     parseComponent: function (content, options) {
         if (!content) throw Error("content is null.");
         if (!options) options = {};
-        var styles = content.match(this._styleRegex);
-        var styleAttrs = content.match(this._styleAttrRegex);
-        var htmls = content.match(this._htmlRegex);
-        var scripts = content.match(this._scriptRegex);
+        var target = this;
+        var styles = content.match(this._styleRegex).map(function (value) {
+            return value.replace(target._styleStartRegex, "");
+        });
+        var styleAttrs = content.match(this._styleAttrRegex).map(function (value) {
+            return value.replace(target._styleAttrStartRegex, "");
+        });
+        var htmls = content.match(this._htmlRegex).map(function (value) {
+            return value.replace(target._htmlStartRegex, "");
+        });
+        var scripts = content.match(this._scriptRegex).map(function (value) {
+            return value.replace(target._scriptStartRegex, "");
+        });
 
         var style = "";
         if (styles != null && styles.length > 0) {
