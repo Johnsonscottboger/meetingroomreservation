@@ -71,7 +71,8 @@ var app = new Vue({
                     if (!response.data.succ) {
                         target.$message.error(response.data.mesg);
                     }
-                    target.user = response.data.data.id;
+                    config.token = response.data.data;
+                    initializer.initializeAxios();
                     target.showLoginDialog = false;
                 }).catch(function (error) {
                     target.$notify.error({

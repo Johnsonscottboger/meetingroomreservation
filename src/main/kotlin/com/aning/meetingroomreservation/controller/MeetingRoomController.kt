@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.controller
 
+import com.aning.meetingroomreservation.annotation.AllowAnonymous
 import com.aning.meetingroomreservation.entity.MeetingRoom
 import com.aning.meetingroomreservation.service.IMeetingRoomService
 import com.aning.meetingroomreservation.viewmodel.Json
@@ -22,6 +23,7 @@ public class MeetingRoomController {
     /**
      * 首页
      */
+    @AllowAnonymous
     @GetMapping("/index")
     public fun index(): String {
         return "meetingroom/index"
@@ -30,6 +32,7 @@ public class MeetingRoomController {
     /**
      * 获取所有会议室
      */
+    @AllowAnonymous
     @ResponseBody
     @GetMapping("")
     public fun getMeetingRoomList(@RequestParam("name") name: String?): Json {

@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.controller
 
+import com.aning.meetingroomreservation.annotation.AllowAnonymous
 import com.aning.meetingroomreservation.entity.User
 import com.aning.meetingroomreservation.service.IUserService
 import com.aning.meetingroomreservation.util.IPUtil
@@ -20,6 +21,7 @@ public class UserController {
     /**
      * 首页
      */
+    @AllowAnonymous
     @GetMapping("/index")
     public fun index(): String {
         return "user/index"
@@ -28,6 +30,7 @@ public class UserController {
     /**
      * 获取所有用户
      */
+    @AllowAnonymous
     @ResponseBody
     @GetMapping("")
     public fun getUserList(@RequestParam("name") name: String?): Json {

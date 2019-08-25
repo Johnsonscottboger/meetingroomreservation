@@ -21,7 +21,7 @@ public class ControllerAspect {
         private const val actionPointCut = "action()"
     }
 
-    private val log = LoggerFactory.getLogger(this::class.java)
+    private val log = LoggerFactory.getLogger("控制器切面")
 
     @Pointcut("execution(* com.aning.meetingroomreservation.controller.HomeController.login(..))")
     public fun login(){
