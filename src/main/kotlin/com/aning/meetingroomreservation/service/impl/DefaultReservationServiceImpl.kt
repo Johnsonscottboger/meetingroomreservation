@@ -4,22 +4,29 @@ import com.aning.meetingroomreservation.dao.IReservationDao
 import com.aning.meetingroomreservation.entity.ReservationRecord
 import com.aning.meetingroomreservation.model.ReservationStatus
 import com.aning.meetingroomreservation.service.IReservationService
+import com.aning.meetingroomreservation.service.ISchedulerService
+import com.aning.meetingroomreservation.service.IUserService
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Resource
 import kotlin.collections.HashSet
 
 @Service
 public class DefaultReservationServiceImpl : IReservationService {
-
     @Resource
     private lateinit var _dao: IReservationDao
+    @Autowired
+    private lateinit var _scheduler: ISchedulerService
 
     /**
      * 添加 [ReservationRecord] 记录
      * @param reservationRecord 添加的 [ReservationRecord] 实例
      */
     override fun add(reservationRecord: ReservationRecord) {
+        this._scheduler.add(reservationRecord)
         this._dao.add(reservationRecord)
     }
 
@@ -28,6 +35,7 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @param reservationRecord 删除的 [ReservationRecord] 实例
      */
     override fun delete(reservationRecord: ReservationRecord) {
+        this._scheduler.delete(reservationRecord)
         this._dao.delete(reservationRecord)
     }
 
@@ -36,6 +44,7 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @param reservationRecord 修改的 [ReservationRecord] 实例
      */
     override fun update(reservationRecord: ReservationRecord) {
+        this._scheduler.update(reservationRecord)
         this._dao.update(reservationRecord)
     }
 
@@ -44,6 +53,7 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @param reservationRecord 添加或修改的 [ReservationRecord] 实例
      */
     override fun addOrUpdate(reservationRecord: ReservationRecord) {
+        this._scheduler.addOrUpdate(reservationRecord)
         this._dao.addOrUpdate(reservationRecord)
     }
 

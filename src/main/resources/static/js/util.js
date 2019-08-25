@@ -1,14 +1,14 @@
 var util = {
-    _styleStartRegex : /<style.*>/gmi,
+    _styleStartRegex: /<style.*>/gmi,
     _styleRegex: /<style.*>[ \s\S]*?(?=<\/style>)/gmi,
 
-    _styleAttrStartRegex : /<style/gmi,
+    _styleAttrStartRegex: /<style/gmi,
     _styleAttrRegex: /<style .+(?=>)/gmi,
 
-    _htmlStartRegex : /<template.*>/gmi,
+    _htmlStartRegex: /<template.*>/gmi,
     _htmlRegex: /<template.*>[\s\S]*(?=<\/template>)/gmi,
 
-    _scriptStartRegex : /<script.*>/gmi,
+    _scriptStartRegex: /<script.*>/gmi,
     _scriptRegex: /<script.*>[ \s\S]*?(?=<\/script>)/gmi,
 
     /**
@@ -25,7 +25,11 @@ var util = {
             return value.replace(target._styleAttrStartRegex, "");
         });
         var htmls = content.match(this._htmlRegex).map(function (value) {
-            return value.replace(target._htmlStartRegex, "");
+            var start = value.match(target._htmlStartRegex);
+            if (start) {
+                return value.replace(start[0], "");
+            }
+            return value;
         });
         var scripts = content.match(this._scriptRegex).map(function (value) {
             return value.replace(target._scriptStartRegex, "");
