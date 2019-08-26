@@ -22,6 +22,13 @@ public class DefaultReservationServiceImpl : IReservationService {
     private lateinit var _scheduler: ISchedulerService
 
     /**
+     * 初始化, 加载历史数据
+     */
+    override fun initialize() {
+        this._scheduler.initialize()
+    }
+
+    /**
      * 添加 [ReservationRecord] 记录
      * @param reservationRecord 添加的 [ReservationRecord] 实例
      */

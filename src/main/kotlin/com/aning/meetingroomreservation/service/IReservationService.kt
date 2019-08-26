@@ -7,6 +7,10 @@ import java.util.*
  * 提供对 [ReservationRecord] 实体操作服务
  */
 public interface IReservationService {
+    /**
+     * 初始化, 加载历史数据添加到定时任务
+     */
+    public fun initialize()
 
     /**
      * 添加 [ReservationRecord] 记录

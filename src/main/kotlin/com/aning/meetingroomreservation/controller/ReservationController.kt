@@ -21,6 +21,10 @@ import kotlin.Comparator
 @Controller
 @RequestMapping("/reserve")
 public class ReservationController {
+    private val initialize : Unit by lazy {
+        this._reserveService.initialize()
+    }
+
     @Autowired
     private lateinit var _userService: IUserService
 
@@ -36,6 +40,7 @@ public class ReservationController {
     @AllowAnonymous
     @GetMapping("/index")
     public fun index(): String {
+        print(this.initialize)
         return "reservation/index"
     }
 
@@ -50,7 +55,7 @@ public class ReservationController {
         return try {
 
             //刷新会议室状态
-            this._reserveService.updateMeetingRoomReservationStatus()
+            //this._reserveService.updateMeetingRoomReservationStatus()
 
             val now = Calendar.getInstance()
             val start = Calendar.Builder()
@@ -102,11 +107,19 @@ public class ReservationController {
                     return Json.fail(operation, message = "未指定预约人")
                 if (reservationRecord.meetingRoomId.isBlank())
                     return Json.fail(operation, message = "未指定预约的会议室")
-                val now = Date()
-                if (reservationRecord.startTime.before(now))
+                val now = Calendar.getInstance()
+                val start = Calendar.getInstance()
+                start.time = reservationRecord.startTime
+                start.add(Calendar.MINUTE, 1)
+                if (start.before(now))
                     return Json.fail(operation, message = "开始时间无效")
-                if (reservationRecord.endTime.before(reservationRecord.startTime))
+
+                val end = Calendar.getInstance()
+                end.time = reservationRecord.endTime
+                end.add(Calendar.MINUTE, 1)
+                if (end.before(start))
                     return Json.fail(operation, message = "结束时间无效")
+
                 val record = this._reserveService.getByMeetingRoomIdDateTime(reservationRecord.meetingRoomId, reservationRecord.startTime, reservationRecord.endTime)
                 if (record.any { p -> p.id != reservationRecord.id && p.status != ReservationStatus.CANCEL.value })
                     return Json.fail(operation, message = "指定时间段内的会议室已被占用")

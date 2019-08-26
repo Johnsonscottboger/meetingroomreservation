@@ -8,6 +8,11 @@ import com.aning.meetingroomreservation.entity.ReservationRecord
 public interface ISchedulerService {
 
     /**
+     * 初始化, 加载历史数据添加到定时任务
+     */
+    public fun initialize()
+
+    /**
      * 添加 [ReservationRecord] 记录
      * @param reservationRecord 添加的 [ReservationRecord] 实例
      */

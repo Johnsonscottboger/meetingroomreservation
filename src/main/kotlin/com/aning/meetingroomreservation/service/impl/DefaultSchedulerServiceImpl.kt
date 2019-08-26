@@ -26,6 +26,20 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
     private lateinit var _dao: IReservationDao
 
     /**
+     * 初始化, 加载历史数据添加到定时任务
+     */
+    override fun initialize() {
+        log.info("加载历史数据")
+        val reservationRecords = this._dao.getByStatusList(listOf(
+                ReservationStatus.UNUSED.value,
+                ReservationStatus.USING.value
+        ))
+        for (reservationRecord in reservationRecords){
+            add(reservationRecord)
+        }
+    }
+
+    /**
      * 添加 [ReservationRecord] 记录
      * @param reservationRecord 添加的 [ReservationRecord] 实例
      */
@@ -33,7 +47,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         recordMap[reservationRecord.id] = reservationRecord
         val task = createTimerTask(reservationRecord)
         taskMap[reservationRecord.id] = task
-        timer.schedule(task, reservationRecord.endTime)
+        timer.schedule(task, reservationRecord.startTime)
     }
 
     /**
@@ -53,7 +67,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         recordMap.replace(reservationRecord.id, reservationRecord)
         val task = createTimerTask(reservationRecord)
         taskMap.replace(reservationRecord.id, task)?.cancel()
-        timer.schedule(task, reservationRecord.endTime)
+        timer.schedule(task, reservationRecord.startTime)
     }
 
     /**
@@ -62,7 +76,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
      */
     override fun addOrUpdate(reservationRecord: ReservationRecord) {
         val record = recordMap[reservationRecord.id]
-        if(record == null){
+        if (record == null) {
             recordMap[reservationRecord.id] = reservationRecord
         } else {
             recordMap.replace(reservationRecord.id, reservationRecord)
@@ -70,12 +84,12 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
 
         val newTask = createTimerTask(reservationRecord)
         val task = taskMap[reservationRecord.id]
-        if(task == null){
+        if (task == null) {
             taskMap[reservationRecord.id] = newTask
         } else {
             taskMap.replace(reservationRecord.id, newTask)?.cancel()
         }
-        timer.schedule(newTask, reservationRecord.endTime)
+        timer.schedule(newTask, reservationRecord.startTime)
     }
 
     /**
@@ -87,7 +101,10 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
                 log.info("刷新会议室状态", reservationRecord)
                 val record = recordMap[reservationRecord.id]
                 if (record != null) {
-                    this@DefaultSchedulerServiceImpl.updateMeetingRoomReservationStatus(record)
+                    val result = this@DefaultSchedulerServiceImpl.updateMeetingRoomReservationStatus(record)
+                    if(result.status == ReservationStatus.USING.value){
+                           timer.schedule(createTimerTask(result), result.endTime)
+                    }
                 }
                 this.cancel()
             }
@@ -96,15 +113,18 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
 
     /**
      * 更新会议室预约状态, 指定的 [reservationRecord] 实例
+     * @return 更新后的会议室记录
      */
-    private fun updateMeetingRoomReservationStatus(reservationRecord: ReservationRecord) {
+    private fun updateMeetingRoomReservationStatus(reservationRecord: ReservationRecord): ReservationRecord {
         updateMeetingRoomReservationStatus(listOf(reservationRecord))
+        return reservationRecord
     }
 
     /**
      * 更新会议室预约状态, 指定的 [reservationRecords] 实例
+     * 更新后的会议室记录
      */
-    private fun updateMeetingRoomReservationStatus(reservationRecords: List<ReservationRecord>) {
+    private fun updateMeetingRoomReservationStatus(reservationRecords: List<ReservationRecord>): List<ReservationRecord> {
         val now = Date()
         /**
          * 会议室预约状态
@@ -146,5 +166,6 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
             ex.printStackTrace()
             throw ex
         }
+        return reservationRecords
     }
 }

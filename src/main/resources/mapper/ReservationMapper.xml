@@ -120,6 +120,8 @@
 
     <select id="getByMeetingRoomIdDateTime" resultMap="map">
         select * from ReservationRecord
-        where meetingRoomId = #{meetingRoomId} and ( #{start} between startTime and endTime or #{end} between startTime and endTime)
+        where meetingRoomId = #{meetingRoomId}
+        and ((startTime &lt;= #{start} and #{start} &lt; endTime)
+            or (startTime &lt; #{end} and #{end} &lt;= endTime))
     </select>
 </mapper>
