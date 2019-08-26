@@ -47,12 +47,18 @@ public class HomeController {
     public fun login(request: HttpServletRequest): Json {
         val operation = "登录"
         return try {
-            val ip = IPUtil.getIPAddress(request)
-            val user = this._userService.getByIP(ip)
-            if (user == null) {
-                Json.fail(operation, message = "未登录")
+            val header = request.getHeader(JwtTokenUtil.AUTH_HEADER)
+            val token = header.substring(JwtTokenUtil.TOKEN_PREFIX.length)
+            val userId = JwtTokenUtil.getUserId(token)
+            if (userId.isNullOrEmpty()) {
+                Json.fail(operation, 401, "未认证")
             } else {
-                Json.succ(operation, data = user)
+                val user = this._userService.getById(userId!!)
+                if (user == null) {
+                    Json.fail(operation, message = "未登录")
+                } else {
+                    Json.succ(operation, data = user)
+                }
             }
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)
