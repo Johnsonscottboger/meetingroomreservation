@@ -81,7 +81,10 @@ public class HomeController {
                 current.ip = IPUtil.getIPAddress(request)
                 this._userService.addOrUpdate(current)
                 val token = JwtTokenUtil.sign(current.id, current.name, current.id)
-                Json.succ(operation, data = token)
+                Json.succ(operation, data = object {
+                    var token = token;
+                    var user = current
+                })
             }
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)

@@ -64,10 +64,14 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
      * @param reservationRecord 修改的 [ReservationRecord] 实例
      */
     override fun update(reservationRecord: ReservationRecord) {
-        recordMap.replace(reservationRecord.id, reservationRecord)
-        val task = createTimerTask(reservationRecord)
-        taskMap.replace(reservationRecord.id, task)?.cancel()
-        timer.schedule(task, reservationRecord.startTime)
+        if(reservationRecord.status == ReservationStatus.CANCEL.value){
+            delete(reservationRecord)
+        } else {
+            recordMap.replace(reservationRecord.id, reservationRecord)
+            val task = createTimerTask(reservationRecord)
+            taskMap.replace(reservationRecord.id, task)?.cancel()
+            timer.schedule(task, reservationRecord.startTime)
+        }
     }
 
     /**
@@ -79,7 +83,11 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         if (record == null) {
             recordMap[reservationRecord.id] = reservationRecord
         } else {
-            recordMap.replace(reservationRecord.id, reservationRecord)
+            if(reservationRecord.status == ReservationStatus.CANCEL.value){
+                recordMap.remove(reservationRecord.id)
+            } else {
+                recordMap.replace(reservationRecord.id, reservationRecord)
+            }
         }
 
         val newTask = createTimerTask(reservationRecord)
@@ -87,7 +95,12 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         if (task == null) {
             taskMap[reservationRecord.id] = newTask
         } else {
-            taskMap.replace(reservationRecord.id, newTask)?.cancel()
+            if(reservationRecord.status == ReservationStatus.CANCEL.value){
+                taskMap.remove(reservationRecord.id)?.cancel()
+                return
+            } else {
+                taskMap.replace(reservationRecord.id, newTask)?.cancel()
+            }
         }
         timer.schedule(newTask, reservationRecord.startTime)
     }

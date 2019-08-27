@@ -19,6 +19,7 @@
 <div id="app">
     <el-container>
         <el-header style="height: 30px; text-align: right; font-size: 24px; margin-top: 10px">
+            <el-button type="text" style="margin-right: 10px;" @click="handleShowLogin">你好, {{ username }}</el-button>
             <el-link icon="el-icon-date" :underline="false" @click="handleReserve">预约</el-link>
             <el-link icon="el-icon-setting" :underline="false" @click="handleSetting">管理</el-link>
         </el-header>
@@ -45,7 +46,11 @@
                 <el-form :model="reservationRecord" :rules="rules" ref="reservationRecord" label-width="90px">
                     <el-form-item label="日期" prop="date">
                         <el-date-picker v-model="reservationRecord.date" style="width:100%"
-                                        type="date"
+                                        type="date" @change="handleDateChange" :picker-options="{
+                                            disabledDate: function(time){
+                                                return time.getTime() < Date.now() - 8.64e7;
+                                            }
+                                        }"
                                         format="yyyy-MM-dd" value-format="yyyy-MM-dd"></el-date-picker>
                     </el-form-item>
                     <el-form-item label="会议室" prop="meetingroom">
@@ -66,7 +71,7 @@
                                                     :picker-options="{
                                                         start : '08:30',
                                                         step: '00:05',
-                                                        end: '21:00',
+                                                        end: '23:00',
                                                         minTime: now
                                                     }"
                                                     palceholder="选择开始时间"></el-time-select>
@@ -79,7 +84,7 @@
                                                     :picker-options="{
                                                         start : '08:30',
                                                         step: '00:05',
-                                                        end: '21:00',
+                                                        end: '23:00',
                                                         minTime: reservationRecord.start
                                                     }"
                                                     palceholder="选择结束时间"></el-time-select>
@@ -120,12 +125,12 @@
     </el-container>
 </div>
 <base th:href="@{/}"/>
-<script src="https://unpkg.com/vue/dist/vue.js"></script>
-<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-<script src="https://unpkg.com/element-ui/lib/index.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
-<script src="https://unpkg.com/js-cookie/src/js.cookie.js"></script>
+<script src="/lib/vue/dist/vue.js"></script>
+<script src="/lib/vue-router/dist/vue-router.js"></script>
+<script src="/lib/element-ui/lib/index.js"></script>
+<script src="/lib/axios/dist/axios.min.js"></script>
+<script src="/lib/jquery/dist/jquery.min.js"></script>
+<script src="/lib/js-cookie/src/js.cookie.js"></script>
 <script src="/js/config.js"></script>
 <script src="/js/startup.js"></script>
 <script src="/js/util.js"></script>

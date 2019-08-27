@@ -13,6 +13,17 @@ var reservationApi = {
     },
 
     /**
+     * 获取指定日期的预约记录
+     */
+    getReservationRecordByDay: function(date){
+        return request.get('/reserve', {
+            params: {
+                date: date
+            }
+        })
+    },
+
+    /**
      * 预约会议室
      */
     reserve : function (reservationRecord) {

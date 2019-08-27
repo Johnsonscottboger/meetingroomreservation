@@ -7,6 +7,7 @@ var app = new Vue({
             collapse: false,
             showDialog: false,
             showLoginDialog: false,
+            username: "请登录",
             now: new Date().getHours() + ":" + new Date().getMinutes(),
             user: '',
             users: [],
@@ -60,6 +61,16 @@ var app = new Vue({
         },
 
         /**
+         * 显示登录窗口
+         */
+        handleShowLogin: function(){
+            var target = this;
+            if(!target.user){
+                target.showLoginDialog = true;
+            }
+        },
+
+        /**
          * 登录
          */
         handleLogin: function (form) {
@@ -71,7 +82,9 @@ var app = new Vue({
                     if (!response.data.succ) {
                         target.$message.error(response.data.mesg);
                     }
-                    config.token = response.data.data;
+                    config.token = response.data.data.token;
+                    target.user = response.data.data.user.id;
+                    target.username = response.data.data.user.name;
                     initializer.initializeAxios();
                     target.showLoginDialog = false;
                 }).catch(function (error) {
@@ -87,6 +100,7 @@ var app = new Vue({
                             target.showLoginDialog = true;
                         } else {
                             target.user = response.data.data.id;
+                            target.username = response.data.data.name;
                         }
                     }).catch(function (error) {
                     target.$notify.error({
@@ -112,7 +126,12 @@ var app = new Vue({
             var target = this;
             this.$refs[formName].validate(function (valid) {
                 if (valid) {
-                    var date = target.reservationRecord.date.toLocaleDateString() + " ";
+                    var date = "";
+                    if(target.reservationRecord.date.toLocaleDateString) {
+                        date = target.reservationRecord.date.toLocaleDateString() + " ";
+                    } else {
+                        date = target.reservationRecord.date + " ";
+                    }
                     var reservation = {
                         userId: target.user,
                         meetingRoomId: target.reservationRecord.meetingroom,
@@ -149,6 +168,21 @@ var app = new Vue({
             this.$refs[formName].resetFields();
             app.showDialog = false;
             app.showLoginDialog = false;
+        },
+
+        /**
+         * 日期更改
+         */
+        handleDateChange: function(str){
+            var cur = new Date();
+            var date = new Date(str);
+            if(cur.getFullYear() !== date.getFullYear()
+            || cur.getMonth() !== date.getMonth()
+            || cur.getDate() !== date.getDate()){
+                this.now = "00:00";
+            } else {
+                this.now = cur.getHours() + ":" + cur.getMinutes();
+            }
         },
 
         /**

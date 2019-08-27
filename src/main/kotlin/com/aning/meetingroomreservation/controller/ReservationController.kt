@@ -50,7 +50,7 @@ public class ReservationController {
     @AllowAnonymous
     @ResponseBody
     @GetMapping("")
-    public fun getReservationRecordToday(): Json {
+    public fun getReservationRecordToday(@RequestParam("date") date: Date?): Json {
         val operation = "今日会议室预约记录"
         return try {
 
@@ -58,6 +58,9 @@ public class ReservationController {
             //this._reserveService.updateMeetingRoomReservationStatus()
 
             val now = Calendar.getInstance()
+            if(date != null){
+                now.time = date
+            }
             val start = Calendar.Builder()
                     .setDate(now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DAY_OF_MONTH])
                     .setTimeOfDay(0, 0, 0)
