@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.controller
 
+import com.aning.meetingroomreservation.annotation.AllowAnonymous
 import com.aning.meetingroomreservation.service.IUserImportService
 import com.aning.meetingroomreservation.viewmodel.Json
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.io.FileInputStream
+import java.net.URLDecoder
 import java.nio.file.Path
 import java.util.*
 
@@ -79,6 +81,6 @@ public class FileController {
      */
     private fun getCurrentPath(): String {
         val path = File(ResourceUtils.getURL(ResourceUtils.CLASSPATH_URL_PREFIX).path)
-        return path.absolutePath
+        return URLDecoder.decode(path.absolutePath, "UTF-8")
     }
 }
