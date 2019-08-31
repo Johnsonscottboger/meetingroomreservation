@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.entity
 
+import java.io.Serializable
 import kotlin.reflect.full.memberProperties
 
 /**
@@ -25,4 +26,4 @@ public data class User(
          * 部门名称
          */
         var department: String = ""
-)
+): Serializable

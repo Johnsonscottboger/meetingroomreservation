@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.entity
 
+import java.io.Serializable
 import java.util.*
 import kotlin.reflect.full.memberProperties
 
@@ -55,6 +56,6 @@ public data class ReservationRecord(
          * 预约时间
          */
         var reserveTime: Date = Date()
-){
+): Serializable {
         constructor() : this( "", "", "", "", Date(), Date(), "")
 }

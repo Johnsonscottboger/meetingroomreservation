@@ -205,6 +205,10 @@
                                     target.$message.error(response.data.mesg);
                                 } else {
                                     target.showDialog = false;
+                                    target.$message({
+                                        type:'success',
+                                        message : '预约成功'
+                                    });
                                     setTimeout(function () {
                                         target.handleLoad();
                                     }, 500);

@@ -1,14 +1,18 @@
 package com.aning.meetingroomreservation.service.impl
 
+import com.aning.meetingroomreservation.annotation.cache.CacheAdd
+import com.aning.meetingroomreservation.annotation.cache.CacheGetOrAdd
 import com.aning.meetingroomreservation.dao.IReservationDao
 import com.aning.meetingroomreservation.entity.ReservationRecord
 import com.aning.meetingroomreservation.model.ReservationStatus
-import com.aning.meetingroomreservation.service.IReservationService
-import com.aning.meetingroomreservation.service.ISchedulerService
-import com.aning.meetingroomreservation.service.IUserService
+import com.aning.meetingroomreservation.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Resource
@@ -20,6 +24,8 @@ public class DefaultReservationServiceImpl : IReservationService {
     private lateinit var _dao: IReservationDao
     @Autowired
     private lateinit var _scheduler: ISchedulerService
+    @Autowired
+    private lateinit var _cacheService: ICacheHashService<String, ReservationRecord>
 
     /**
      * 初始化, 加载历史数据
@@ -32,6 +38,7 @@ public class DefaultReservationServiceImpl : IReservationService {
      * 添加 [ReservationRecord] 记录
      * @param reservationRecord 添加的 [ReservationRecord] 实例
      */
+    @CacheAdd()
     override fun add(reservationRecord: ReservationRecord) {
         this._scheduler.add(reservationRecord)
         this._dao.add(reservationRecord)
@@ -60,6 +67,23 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @param reservationRecord 添加或修改的 [ReservationRecord] 实例
      */
     override fun addOrUpdate(reservationRecord: ReservationRecord) {
+        val now = Calendar.getInstance()
+        now.time = reservationRecord.startTime
+        val start = Calendar.Builder()
+                .setDate(now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DAY_OF_MONTH])
+                .setTimeOfDay(0, 0, 0)
+                .build()
+                .time
+        val end = Calendar.Builder()
+                .setDate(now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DAY_OF_MONTH])
+                .setTimeOfDay(23, 59, 59)
+                .build()
+                .time
+        val key = "${start.time}_${end.time}"
+        this._cacheService.addOrUpdate(key,
+                reservationRecord.id to reservationRecord,
+                reservationRecord.id to reservationRecord
+        )
         this._scheduler.addOrUpdate(reservationRecord)
         this._dao.addOrUpdate(reservationRecord)
     }
@@ -106,7 +130,17 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @return [ReservationRecord] 记录
      */
     override fun getByDateTime(start: Date, end: Date): List<ReservationRecord> {
-        return this._dao.getByDateTime(start, end)
+        val key = "${start.time}_${end.time}"
+//        return this._cacheService.getOrAdd(key, valueFactory = { _ ->
+//            this._dao.getByDateTime(start, end)
+//        }, expire = 3600L)!!
+
+        val cached = this._cacheService.get(key)
+        return if (cached == null || cached.isEmpty()) {
+            this._dao.getByDateTime(start, end)
+        } else {
+            cached.values.toList()
+        }
     }
 
     /**
@@ -118,67 +152,5 @@ public class DefaultReservationServiceImpl : IReservationService {
      */
     override fun getByMeetingRoomIdDateTime(meetingRoomId: String, start: Date, end: Date): List<ReservationRecord> {
         return this._dao.getByMeetingRoomIdDateTime(meetingRoomId, start, end)
-    }
-
-    /**
-     * 更新会议室预约状态, 当前记录中的所有实例
-     */
-    override fun updateMeetingRoomReservationStatus() {
-        val list = this._dao.getByStatusList(listOf(ReservationStatus.UNUSED.value, ReservationStatus.USING.value))
-        updateMeetingRoomReservationStatus(list)
-    }
-
-    /**
-     * 更新会议室预约状态, 指定的 [reservationRecord] 实例
-     */
-    override fun updateMeetingRoomReservationStatus(reservationRecord: ReservationRecord) {
-        updateMeetingRoomReservationStatus(listOf(reservationRecord))
-    }
-
-    /**
-     * 更新会议室预约状态, 指定的 [reservationRecords] 实例
-     */
-    override fun updateMeetingRoomReservationStatus(reservationRecords: List<ReservationRecord>) {
-        val now = Date()
-        /**
-         * 会议室预约状态
-         * 1. 如果开始时间大于当前时间 -> 未开始
-         * 2. 如果开始时间小于等于当前时间 -> 正在使用
-         * 3. 如果结束时间大于当前时间 -> 正在使用
-         * 4. 如果结束时间小于当前时间 -> 使用结束
-         */
-        val updateList = HashSet<ReservationRecord>()
-        for (record in reservationRecords) {
-            if (record.startTime.after(now)) {
-                if (record.status != ReservationStatus.UNUSED.value) {
-                    record.status = ReservationStatus.UNUSED.value
-                    updateList.add(record)
-                }
-                continue
-            }
-            if (record.endTime.after(now)) {
-                if (record.status != ReservationStatus.USING.value) {
-                    record.status = ReservationStatus.USING.value
-                    updateList.add(record)
-                }
-                continue
-            }
-            if (record.endTime.before(now)) {
-                if (record.status != ReservationStatus.USED.value) {
-                    record.status = ReservationStatus.USED.value
-                    updateList.add(record)
-                }
-                continue
-            }
-        }
-        try {
-            if (updateList.isNotEmpty()) {
-                this._dao.updateList(updateList.toList())
-            }
-        } catch (ex: Exception) {
-            println("更新会议室状态失败!!!")
-            ex.printStackTrace()
-            throw ex
-        }
     }
 }

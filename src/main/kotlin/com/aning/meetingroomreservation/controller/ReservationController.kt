@@ -10,18 +10,24 @@ import com.aning.meetingroomreservation.service.IUserService
 import com.aning.meetingroomreservation.util.IPUtil
 import com.aning.meetingroomreservation.viewmodel.Json
 import com.aning.meetingroomreservation.viewmodel.ReservationRecordViewModel
+import com.mysql.cj.protocol.a.ResultsetRowReader
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.Semaphore
 import javax.servlet.http.HttpServletRequest
 import kotlin.Comparator
 
 @Controller
 @RequestMapping("/reserve")
 public class ReservationController {
-    private val initialize : Unit by lazy {
+    companion object {
+        private val semaphore = Semaphore(1)
+    }
+
+    private val initialize: Unit by lazy {
         this._reserveService.initialize()
     }
 
@@ -53,12 +59,8 @@ public class ReservationController {
     public fun getReservationRecordToday(@RequestParam("date") date: Date?): Json {
         val operation = "今日会议室预约记录"
         return try {
-
-            //刷新会议室状态
-            //this._reserveService.updateMeetingRoomReservationStatus()
-
             val now = Calendar.getInstance()
-            if(date != null){
+            if (date != null) {
                 now.time = date
             }
             val start = Calendar.Builder()
@@ -105,7 +107,9 @@ public class ReservationController {
     public fun reserve(request: HttpServletRequest, @RequestBody reservationRecord: ReservationRecord): Json {
         val operation = "预约会议室"
         return try {
-            if(reservationRecord.status != ReservationStatus.CANCEL.value) {
+            if (reservationRecord.status == ReservationStatus.CANCEL.value) {
+                this._reserveService.addOrUpdate(reservationRecord)
+            } else {
                 if (reservationRecord.userId.isBlank())
                     return Json.fail(operation, message = "未指定预约人")
                 if (reservationRecord.meetingRoomId.isBlank())
@@ -116,21 +120,24 @@ public class ReservationController {
                 start.add(Calendar.MINUTE, 1)
                 if (start.before(now))
                     return Json.fail(operation, message = "开始时间无效")
-
                 val end = Calendar.getInstance()
                 end.time = reservationRecord.endTime
                 end.add(Calendar.MINUTE, 1)
                 if (end.before(start))
                     return Json.fail(operation, message = "结束时间无效")
-
-                val record = this._reserveService.getByMeetingRoomIdDateTime(reservationRecord.meetingRoomId, reservationRecord.startTime, reservationRecord.endTime)
-                if (record.any { p -> p.id != reservationRecord.id && p.status != ReservationStatus.CANCEL.value })
-                    return Json.fail(operation, message = "指定时间段内的会议室已被占用")
+                try {
+                    semaphore.acquire()
+                    val record = this._reserveService.getByMeetingRoomIdDateTime(reservationRecord.meetingRoomId, reservationRecord.startTime, reservationRecord.endTime)
+                    if (record.any { p -> p.id != reservationRecord.id && p.status != ReservationStatus.CANCEL.value })
+                        return Json.fail(operation, message = "指定时间段内的会议室已被占用")
+                    if (reservationRecord.id.isEmpty())
+                        reservationRecord.id = UUID.randomUUID().toString()
+                    this._reserveService.addOrUpdate(reservationRecord)
+                }
+                finally {
+                    semaphore.release()
+                }
             }
-            if (reservationRecord.id.isEmpty())
-                reservationRecord.id = UUID.randomUUID().toString()
-            reservationRecord.ip = IPUtil.getIPAddress(request)
-            this._reserveService.addOrUpdate(reservationRecord)
             Json.succ(operation)
         } catch (ex: Exception) {
             Json.fail(operation, message = ex.message!!)

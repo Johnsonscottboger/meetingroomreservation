@@ -145,6 +145,10 @@ var app = new Vue({
                                 target.$message.error(response.data.mesg);
                             } else {
                                 target.showDialog = false;
+                                target.$message({
+                                    type:'success',
+                                    message : '预约成功'
+                                });
                                 if (target.handleRefresh)
                                     target.handleRefresh();
                             }

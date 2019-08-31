@@ -1,6 +1,7 @@
 package com.aning.meetingroomreservation.service
 
 import com.aning.meetingroomreservation.entity.ReservationRecord
+import org.springframework.cache.annotation.Cacheable
 import java.util.*
 
 /**
@@ -79,19 +80,4 @@ public interface IReservationService {
      * @return [ReservationRecord] 记录
      */
     public fun getByMeetingRoomIdDateTime(meetingRoomId: String, start: Date, end: Date): List<ReservationRecord>
-
-    /**
-     * 更新会议室预约状态, 当前记录中的所有实例
-     */
-    public fun updateMeetingRoomReservationStatus()
-
-    /**
-     * 更新会议室预约状态, 指定的 [reservationRecord] 实例
-     */
-    public fun updateMeetingRoomReservationStatus(reservationRecord: ReservationRecord)
-
-    /**
-     * 更新会议室预约状态, 指定的 [reservationRecords] 实例
-     */
-    public fun updateMeetingRoomReservationStatus(reservationRecords: List<ReservationRecord>)
 }

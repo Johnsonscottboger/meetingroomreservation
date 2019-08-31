@@ -1,5 +1,6 @@
 package com.aning.meetingroomreservation.entity
 
+import java.io.Serializable
 import java.util.*
 import kotlin.reflect.full.memberProperties
 import kotlin.text.StringBuilder
@@ -32,4 +33,4 @@ public data class MeetingRoom(
          * 创建时间
          */
         var createDateTime : Date = Date()
-)
+) : Serializable

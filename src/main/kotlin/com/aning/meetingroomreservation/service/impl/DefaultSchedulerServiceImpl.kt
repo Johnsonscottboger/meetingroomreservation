@@ -30,11 +30,21 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
      */
     override fun initialize() {
         log.info("加载历史数据")
+        val now = Calendar.getInstance()
+        now.set(Calendar.HOUR_OF_DAY, 0)
+        now.set(Calendar.MINUTE, 0)
+        now.set(Calendar.SECOND, 0)
+        now.add(Calendar.DAY_OF_MONTH, 1)
+        timer.schedule(object : TimerTask() {
+            override fun run() {
+                timer.purge()
+            }
+        }, now.time, 24 * 60 * 60 * 1000)
         val reservationRecords = this._dao.getByStatusList(listOf(
                 ReservationStatus.UNUSED.value,
                 ReservationStatus.USING.value
         ))
-        for (reservationRecord in reservationRecords){
+        for (reservationRecord in reservationRecords) {
             add(reservationRecord)
         }
     }
@@ -64,7 +74,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
      * @param reservationRecord 修改的 [ReservationRecord] 实例
      */
     override fun update(reservationRecord: ReservationRecord) {
-        if(reservationRecord.status == ReservationStatus.CANCEL.value){
+        if (reservationRecord.status == ReservationStatus.CANCEL.value) {
             delete(reservationRecord)
         } else {
             recordMap.replace(reservationRecord.id, reservationRecord)
@@ -83,7 +93,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         if (record == null) {
             recordMap[reservationRecord.id] = reservationRecord
         } else {
-            if(reservationRecord.status == ReservationStatus.CANCEL.value){
+            if (reservationRecord.status == ReservationStatus.CANCEL.value) {
                 recordMap.remove(reservationRecord.id)
             } else {
                 recordMap.replace(reservationRecord.id, reservationRecord)
@@ -95,7 +105,7 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         if (task == null) {
             taskMap[reservationRecord.id] = newTask
         } else {
-            if(reservationRecord.status == ReservationStatus.CANCEL.value){
+            if (reservationRecord.status == ReservationStatus.CANCEL.value) {
                 taskMap.remove(reservationRecord.id)?.cancel()
                 return
             } else {
@@ -115,8 +125,8 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
                 val record = recordMap[reservationRecord.id]
                 if (record != null) {
                     val result = this@DefaultSchedulerServiceImpl.updateMeetingRoomReservationStatus(record)
-                    if(result.status == ReservationStatus.USING.value){
-                           timer.schedule(createTimerTask(result), result.endTime)
+                    if (result.status == ReservationStatus.USING.value) {
+                        timer.schedule(createTimerTask(result), result.endTime)
                     }
                 }
                 this.cancel()
