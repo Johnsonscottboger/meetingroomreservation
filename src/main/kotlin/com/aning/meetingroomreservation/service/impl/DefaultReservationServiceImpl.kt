@@ -1,31 +1,26 @@
 package com.aning.meetingroomreservation.service.impl
 
 import com.aning.meetingroomreservation.annotation.cache.CacheAdd
-import com.aning.meetingroomreservation.annotation.cache.CacheGetOrAdd
+import com.aning.meetingroomreservation.cache.ICacheHashService
+import com.aning.meetingroomreservation.cache.ICacheSetService
 import com.aning.meetingroomreservation.dao.IReservationDao
 import com.aning.meetingroomreservation.entity.ReservationRecord
-import com.aning.meetingroomreservation.model.ReservationStatus
 import com.aning.meetingroomreservation.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.CachePut
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import javax.annotation.Resource
-import kotlin.collections.HashSet
 
 @Service
 public class DefaultReservationServiceImpl : IReservationService {
+    private val log = LoggerFactory.getLogger(this::class.java)
     @Resource
     private lateinit var _dao: IReservationDao
     @Autowired
     private lateinit var _scheduler: ISchedulerService
     @Autowired
-    private lateinit var _cacheService: ICacheHashService<String, ReservationRecord>
+    private lateinit var _cacheService: ICacheSetService<ReservationRecord>
 
     /**
      * 初始化, 加载历史数据
@@ -80,12 +75,11 @@ public class DefaultReservationServiceImpl : IReservationService {
                 .build()
                 .time
         val key = "${start.time}_${end.time}"
-        this._cacheService.addOrUpdate(key,
-                reservationRecord.id to reservationRecord,
-                reservationRecord.id to reservationRecord
-        )
         this._scheduler.addOrUpdate(reservationRecord)
         this._dao.addOrUpdate(reservationRecord)
+        this._cacheService.addOrUpdate(key, reservationRecord, 86_400_000) { i, p ->
+            i.id == p.id
+        }
     }
 
     /**
@@ -131,16 +125,10 @@ public class DefaultReservationServiceImpl : IReservationService {
      */
     override fun getByDateTime(start: Date, end: Date): List<ReservationRecord> {
         val key = "${start.time}_${end.time}"
-//        return this._cacheService.getOrAdd(key, valueFactory = { _ ->
-//            this._dao.getByDateTime(start, end)
-//        }, expire = 3600L)!!
-
-        val cached = this._cacheService.get(key)
-        return if (cached == null || cached.isEmpty()) {
+        return this._cacheService.getOrAddRange(key, valuesFactory = {
+            log.warn("Get from database")
             this._dao.getByDateTime(start, end)
-        } else {
-            cached.values.toList()
-        }
+        }, expire = 86_400_000).toList()
     }
 
     /**

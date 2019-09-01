@@ -1,4 +1,4 @@
-package com.aning.meetingroomreservation.service
+package com.aning.meetingroomreservation.cache
 
 import java.time.Duration
 

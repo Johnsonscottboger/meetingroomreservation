@@ -1,11 +1,13 @@
-package com.aning.meetingroomreservation.service.impl
+package com.aning.meetingroomreservation.cache.impl
 
-import com.aning.meetingroomreservation.service.ICacheHashService
+import com.aning.meetingroomreservation.cache.ICacheHashService
 import org.springframework.data.redis.core.HashOperations
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.serializer.RedisSerializer
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import javax.annotation.PostConstruct
 import javax.annotation.Resource
 
 /**

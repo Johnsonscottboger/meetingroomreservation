@@ -2,7 +2,7 @@ package com.aning.meetingroomreservation.aop
 
 import com.aning.meetingroomreservation.annotation.cache.*
 import com.aning.meetingroomreservation.extension.takeIf
-import com.aning.meetingroomreservation.service.ICacheService
+import com.aning.meetingroomreservation.cache.ICacheService
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect

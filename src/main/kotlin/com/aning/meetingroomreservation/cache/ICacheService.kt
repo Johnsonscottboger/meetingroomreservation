@@ -1,8 +1,6 @@
-package com.aning.meetingroomreservation.service
+package com.aning.meetingroomreservation.cache
 
 import java.time.Duration
-import java.time.LocalTime
-import java.util.*
 
 /**
  * 提供缓存服务
@@ -205,6 +203,8 @@ public interface ICacheService<T : Any> {
 
     /**
      * 获取指定的键在缓存中是否存在
+     * @param key 指定的键
+     * @return 是否存在
      */
     public fun exists(key: String): Boolean
 }

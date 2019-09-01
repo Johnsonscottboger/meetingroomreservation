@@ -1,10 +1,12 @@
 package com.aning.meetingroomreservation.service.impl
 
+import com.aning.meetingroomreservation.cache.ICacheSetService
 import com.aning.meetingroomreservation.dao.IReservationDao
 import com.aning.meetingroomreservation.entity.ReservationRecord
 import com.aning.meetingroomreservation.model.ReservationStatus
 import com.aning.meetingroomreservation.service.ISchedulerService
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -24,6 +26,9 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
 
     @Resource
     private lateinit var _dao: IReservationDao
+
+    @Autowired
+    private lateinit var _cacheService: ICacheSetService<ReservationRecord>
 
     /**
      * 初始化, 加载历史数据添加到定时任务
@@ -183,6 +188,12 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
         try {
             if (updateList.isNotEmpty()) {
                 this._dao.updateList(updateList.toList())
+                val pairs = updateList.groupBy { p -> computeKey(p) }
+                for (pair in pairs) {
+                    this._cacheService.addOrUpdateRange(pair.key, pair.value, 86_400_000){ i, p ->
+                        i.id == p.id
+                    }
+                }
             }
         } catch (ex: Exception) {
             println("更新会议室状态失败!!!")
@@ -190,5 +201,21 @@ public class DefaultSchedulerServiceImpl : ISchedulerService {
             throw ex
         }
         return reservationRecords
+    }
+
+    private fun computeKey(record: ReservationRecord): String {
+        val now = Calendar.getInstance()
+        now.time = record.startTime
+        val start = Calendar.Builder()
+                .setDate(now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DAY_OF_MONTH])
+                .setTimeOfDay(0, 0, 0)
+                .build()
+                .time
+        val end = Calendar.Builder()
+                .setDate(now[Calendar.YEAR], now[Calendar.MONTH], now[Calendar.DAY_OF_MONTH])
+                .setTimeOfDay(23, 59, 59)
+                .build()
+                .time
+        return "${start.time}_${end.time}"
     }
 }
