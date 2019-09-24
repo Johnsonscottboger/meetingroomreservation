@@ -50,6 +50,7 @@ public class FileController {
      * 导入文件
      */
     @ResponseBody
+    @AllowAnonymous
     @PostMapping("/import")
     public fun import(file: MultipartFile): Json {
         val operation = "导入文件"

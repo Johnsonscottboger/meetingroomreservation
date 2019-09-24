@@ -19,16 +19,4 @@ class MeetingroomreservationApplicationTests {
     @Test
     fun contextLoads() {
     }
-
-    val id = "20190901"
-    val empty = ""
-    val now = Date().apply {
-        time = 1567319700000
-    }
-
-    @Test
-    fun addReservationRecord() {
-        val record = ReservationRecord(id, empty, empty, empty, now, now, null, 0, now)
-        this._cacheService.addOrUpdateRange("key", listOf(record), 36000)
-    }
 }

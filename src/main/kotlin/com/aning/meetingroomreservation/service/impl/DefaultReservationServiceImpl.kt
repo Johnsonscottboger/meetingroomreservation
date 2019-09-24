@@ -2,10 +2,12 @@ package com.aning.meetingroomreservation.service.impl
 
 import com.aning.meetingroomreservation.annotation.cache.CacheAdd
 import com.aning.meetingroomreservation.cache.ICacheHashService
+import com.aning.meetingroomreservation.cache.ICacheSetAsyncService
 import com.aning.meetingroomreservation.cache.ICacheSetService
 import com.aning.meetingroomreservation.dao.IReservationDao
 import com.aning.meetingroomreservation.entity.ReservationRecord
 import com.aning.meetingroomreservation.service.*
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,6 +23,8 @@ public class DefaultReservationServiceImpl : IReservationService {
     private lateinit var _scheduler: ISchedulerService
     @Autowired
     private lateinit var _cacheService: ICacheSetService<ReservationRecord>
+    @Autowired
+    private lateinit var _cacheAsyncService : ICacheSetAsyncService<ReservationRecord>
 
     /**
      * 初始化, 加载历史数据
@@ -123,12 +127,17 @@ public class DefaultReservationServiceImpl : IReservationService {
      * @param end 指定的结束时间
      * @return [ReservationRecord] 记录
      */
-    override fun getByDateTime(start: Date, end: Date): List<ReservationRecord> {
+    override fun getByDateTime(start: Date, end: Date): List<ReservationRecord>  {
         val key = "${start.time}_${end.time}"
         return this._cacheService.getOrAddRange(key, valuesFactory = {
             log.warn("Get from database")
             this._dao.getByDateTime(start, end)
         }, expire = 86_400_000).toList()
+
+//         this@DefaultReservationServiceImpl._cacheAsyncService.getOrAddRangeAsync(key, valuesFactory = {
+//            log.warn("Get from database")
+//            this@DefaultReservationServiceImpl._dao.getByDateTime(start, end)
+//        }, expire = 86_400_000).await().toList()
     }
 
     /**

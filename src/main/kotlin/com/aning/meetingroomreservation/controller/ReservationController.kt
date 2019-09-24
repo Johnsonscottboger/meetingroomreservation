@@ -114,6 +114,8 @@ public class ReservationController {
                     return Json.fail(operation, message = "未指定预约人")
                 if (reservationRecord.meetingRoomId.isBlank())
                     return Json.fail(operation, message = "未指定预约的会议室")
+                if(reservationRecord.startTime == reservationRecord.endTime)
+                    return Json.fail(operation, message = "预约时间无效")
                 val now = Calendar.getInstance()
                 val start = Calendar.getInstance()
                 start.time = reservationRecord.startTime

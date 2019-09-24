@@ -90,4 +90,11 @@ public class HomeController {
             Json.fail(operation, message = ex.message!!)
         }
     }
+
+    @AllowAnonymous
+    @ResponseBody
+    @GetMapping("/error")
+    public fun error(request: HttpServletRequest, response: HttpServletResponse) : Json {
+        return Json.fail("错误")
+    }
 }
