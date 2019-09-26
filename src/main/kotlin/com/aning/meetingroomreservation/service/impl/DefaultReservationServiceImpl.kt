@@ -22,7 +22,7 @@ public class DefaultReservationServiceImpl : IReservationService {
     @Autowired
     private lateinit var _scheduler: ISchedulerService
     @Autowired
-    private lateinit var _cacheService: ICacheSetService<ReservationRecord>
+    private lateinit var _cacheService: IReservationCacheService
     @Autowired
     private lateinit var _cacheAsyncService : ICacheSetAsyncService<ReservationRecord>
 
@@ -133,11 +133,6 @@ public class DefaultReservationServiceImpl : IReservationService {
             log.warn("Get from database")
             this._dao.getByDateTime(start, end)
         }, expire = 86_400_000).toList()
-
-//         this@DefaultReservationServiceImpl._cacheAsyncService.getOrAddRangeAsync(key, valuesFactory = {
-//            log.warn("Get from database")
-//            this@DefaultReservationServiceImpl._dao.getByDateTime(start, end)
-//        }, expire = 86_400_000).await().toList()
     }
 
     /**

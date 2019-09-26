@@ -14,7 +14,9 @@
             <el-col style="width: 50%">
                 <el-table :data="reservationList" :row-class-name="tableRowClassName">
                     <el-table-column type="index" width="50"></el-table-column>
-                    <el-table-column prop="name" label="会议室"></el-table-column>
+                    <el-table-column prop="name" label="会议室">
+                        
+                    </el-table-column>
                     <el-table-column prop="startTime" label="开始"></el-table-column>
                     <el-table-column prop="endTime" label="结束"></el-table-column>
                     <el-table-column prop="statusDesc" label="状态"></el-table-column>
