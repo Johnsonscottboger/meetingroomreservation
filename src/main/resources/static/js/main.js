@@ -63,9 +63,9 @@ var app = new Vue({
         /**
          * 显示登录窗口
          */
-        handleShowLogin: function(){
+        handleShowLogin: function () {
             var target = this;
-            if(!target.user){
+            if (!target.user) {
                 target.showLoginDialog = true;
             }
         },
@@ -97,16 +97,18 @@ var app = new Vue({
                 axios.get('/login')
                     .then(function (response) {
                         if (!response.data.succ) {
+                            config.token = '';
                             target.showLoginDialog = true;
                         } else {
                             target.user = response.data.data.id;
                             target.username = response.data.data.name;
                         }
                     }).catch(function (error) {
-                    target.$notify.error({
-                        title: '错误',
-                        message: error.message
-                    })
+                        config.token = '';
+                        target.$notify.error({
+                            title: '错误',
+                            message: error.message
+                        })
                 })
             }
         },
@@ -127,7 +129,7 @@ var app = new Vue({
             this.$refs[formName].validate(function (valid) {
                 if (valid) {
                     var date = "";
-                    if(target.reservationRecord.date.toLocaleDateString) {
+                    if (target.reservationRecord.date.toLocaleDateString) {
                         date = target.reservationRecord.date.toLocaleDateString() + " ";
                     } else {
                         date = target.reservationRecord.date + " ";
@@ -146,8 +148,8 @@ var app = new Vue({
                             } else {
                                 target.showDialog = false;
                                 target.$message({
-                                    type:'success',
-                                    message : '预约成功'
+                                    type: 'success',
+                                    message: '预约成功'
                                 });
                                 if (target.handleRefresh)
                                     target.handleRefresh();
@@ -177,12 +179,12 @@ var app = new Vue({
         /**
          * 日期更改
          */
-        handleDateChange: function(str){
+        handleDateChange: function (str) {
             var cur = new Date();
             var date = new Date(str);
-            if(cur.getFullYear() !== date.getFullYear()
-            || cur.getMonth() !== date.getMonth()
-            || cur.getDate() !== date.getDate()){
+            if (cur.getFullYear() !== date.getFullYear()
+                || cur.getMonth() !== date.getMonth()
+                || cur.getDate() !== date.getDate()) {
                 this.now = "00:00";
             } else {
                 this.now = cur.getHours() + ":" + cur.getMinutes();

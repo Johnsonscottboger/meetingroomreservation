@@ -2,18 +2,24 @@ package com.aning.meetingroomreservation.interceptor
 
 import com.aning.meetingroomreservation.annotation.AllowAnonymous
 import com.aning.meetingroomreservation.exception.UnauthorizedException
+import com.aning.meetingroomreservation.service.IUserService
 import com.aning.meetingroomreservation.util.JwtTokenUtil
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
+import javax.annotation.Resource
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
  * JWT 拦截器
  */
+@Component
 public class JwtInterceptor : HandlerInterceptor {
+
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
         response.setHeader("Access-control-Allow-Origin", request.getHeader("Origin"))
         response.setHeader("Access-control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE")

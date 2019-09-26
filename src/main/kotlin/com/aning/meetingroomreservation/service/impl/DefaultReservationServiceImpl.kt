@@ -131,7 +131,11 @@ public class DefaultReservationServiceImpl : IReservationService {
         val key = "${start.time}_${end.time}"
         return this._cacheService.getOrAddRange(key, valuesFactory = {
             log.warn("Get from database")
-            this._dao.getByDateTime(start, end)
+            val values = this._dao.getByDateTime(start, end)
+            this._cacheService.addOrUpdateRange(key, values, 86_400_000) { i, p ->
+                i.id == p.id
+            }
+            values
         }, expire = 86_400_000).toList()
     }
 

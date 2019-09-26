@@ -1,15 +1,21 @@
 package com.aning.meetingroomreservation.util
 
+import com.aning.meetingroomreservation.service.IUserService
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 import java.util.*
+import javax.annotation.Resource
 
 /**
  * Jwt Token 工具类
  */
+@Component
 public class JwtTokenUtil {
     companion object {
+
         private const val EXPIRE_TIME = 10 * 24 * 60 * 60 * 1000
 
         /**
